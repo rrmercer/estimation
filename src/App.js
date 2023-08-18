@@ -6,11 +6,12 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux'
+import { updateComplexity, updateRisk, selectUsers } from './estimators';
 
-
-const Section = ({title, initSeverity}) => {
-
-  const [severity, setSeverity] = useState(initSeverity);
+const Section = ({title, initLevel, user, updateLevel}) => {
+  const dispatch = useDispatch();
+  const [level, setLevel] = useState(initLevel);
 
   return (
     <Card style={{ width: '18rem' }}>
@@ -19,9 +20,14 @@ const Section = ({title, initSeverity}) => {
         <Card.Subtitle className="mb-2 text-muted">Select an {title} level</Card.Subtitle>
         
         <ButtonGroup aria-label="Basic example">
-          <Button variant={severity === "low" ? "primary" : "secondary"} onClick={() => {setSeverity("low");}}>Low</Button>
-          <Button variant={severity === "medium" ? "primary" : "secondary"} onClick={() => {setSeverity("medium");}}>Medium</Button>
-          <Button variant={severity === "high" ? "primary" : "secondary"} onClick={() => {setSeverity("high");}}>High</Button>
+          <Button variant={level === "low" ? "primary" : "secondary"} 
+            onClick={() => {setLevel("low"); dispatch(updateLevel([user, "low"]))}}>Low</Button>
+          <Button variant={level === "medium" ? "primary" : "secondary"} 
+            onClick={() => {setLevel("medium"); dispatch(updateLevel([user, "medium"]))}}>Medium</Button>
+          <Button variant={level === "high" ? "primary" : "secondary"} 
+            onClick={() => {setLevel("high"); dispatch(updateLevel([user, "high"]))}}>
+              High
+          </Button>
         </ButtonGroup>
       </Card.Body>
     </Card>
@@ -29,15 +35,34 @@ const Section = ({title, initSeverity}) => {
 
 }
 
+const levelToInt = (level) => {
+  if (level === "low") {
+    return 1;
+  }
+  if (level === "medium") {
+    return 2;
+  }
+  if (level === "3") {
+    return 3;
+  }
+}
+const calculateScore = ({risk, complexity, effort}) => {
+    const intRisk = levelToInt(risk);
+    const intComplexity = levelToInt(complexity);
+    const intEffort = levelToInt(effort);
+}
+
 function App() {
+  const users = useSelector(selectUsers);
+
   return (
     <div className="App">
       
       <header className="App-header">
         <Container>
           <Row>
-            <Col><Section title="Risk" /></Col>
-            <Col><Section title="Complexity" /></Col>
+            <Col><Section title="Risk" initLevel={users["rob"]["risk"]} user={"rob"} updateLevel={updateRisk} /></Col>
+            <Col><Section title="Complexity" initLevel={users["rob"]["complexity"]} user={"rob"} updateLevel={updateComplexity}/></Col>
             <Col><Section title="Effort" /></Col>
           </Row>
         </Container>
@@ -49,7 +74,14 @@ function App() {
             <Col>Risk</Col>
             <Col>Complexity</Col>
             <Col>Effort</Col>
+            <Col>Score</Col>
           </Row>
+          {
+            Object.entries(users).map(([userName, user]) => {
+                const {risk, complexity, effort} = {...user};
+                return <Row key={userName}><Col>{userName}</Col><Col>{risk}</Col><Col>{complexity}</Col><Col>{effort}</Col><Col>0</Col></Row>
+            })
+          }
         </Container>
         
          
