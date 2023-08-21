@@ -78,18 +78,21 @@ function App() {
     <div className="App">
       
       <header className="App-header">
-        <Container>
+        <Container justify="center">
           <Row>
             <Col><Section title="Risk" user={localUser} updateLevel={updateRisk} /></Col>
             <Col><Section title="Complexity" user={localUser} updateLevel={updateComplexity}/></Col>
             <Col><Section title="Effort" user={localUser} updateLevel={updateEffort} /></Col>
           </Row>
-          <Row>
+        </Container>
+        <Container>
+          <Row className="justify-content-md-center">
+          <Col></Col>
+            <Col></Col>
             <Col> 
               <Button variant="primary" onClick={() => dispatch(clear())}>Clear</Button>
-              {showOrHideButton}
             </Col>
-            <Col></Col>
+            <Col>{showOrHideButton}</Col>
           </Row>
         </Container>
         

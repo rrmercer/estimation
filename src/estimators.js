@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-
+import { v4 as uuidv4 } from 'uuid';
 
 const levelToInt = (level) => {
     if (level === "low") {
@@ -47,7 +47,7 @@ export const estimatorsSlice = createSlice({
   name: 'estimators',
   initialState: {
     showEstimations: true,
-    localUser: "john",
+    localUser: "rob",
     users: { 
             "rob": {
                 "id": 1,
@@ -94,7 +94,8 @@ export const estimatorsSlice = createSlice({
                 "risk": "",
                 "complexity": "",
                 "effort": "",
-                "score": ""
+                "score": "",
+                "id": uuidv4(),
             };
             newUsers[userName[0]] = {...empty};
         });
