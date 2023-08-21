@@ -5,9 +5,9 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
-import { updateComplexity, updateRisk, selectUsers } from './estimators';
+import { updateComplexity, updateRisk, selectUsers, selectShowEstimations, showEstimations, hideEstimations } from './estimators';
 
 const Section = ({title, initLevel, user, updateLevel}) => {
   const dispatch = useDispatch();
@@ -32,12 +32,22 @@ const Section = ({title, initLevel, user, updateLevel}) => {
       </Card.Body>
     </Card>
   );
-
 }
 
 
 function App() {
+  const dispatch = useDispatch();
   const users = useSelector(selectUsers);
+  const displayEstimations = useSelector(selectShowEstimations);
+
+  const showOrHideButton = useMemo(() => {
+    if (displayEstimations) {
+      return  <Button variant="secondary" onClick={() => {dispatch(hideEstimations());}}>Hide</Button>
+    } else {
+      return <Button variant="primary" onClick={() => {dispatch(showEstimations());}}>Show</Button>
+    }
+  }, [displayEstimations]);
+  
   return (
     <div className="App">
       
@@ -48,9 +58,16 @@ function App() {
             <Col><Section title="Complexity" initLevel={users["rob"]["complexity"]} user={"rob"} updateLevel={updateComplexity}/></Col>
             <Col><Section title="Effort" /></Col>
           </Row>
+          <Row>
+            <Col> 
+              <Button variant="primary">Clear</Button>
+              {showOrHideButton}
+            </Col>
+            <Col></Col>
+          </Row>
         </Container>
-        <Button variant="primary">Clear</Button>
-        <Button variant="primary">Show</Button>
+       
+        
         <Container>
           <Row>
             <Col>Name</Col>
@@ -62,7 +79,12 @@ function App() {
           {
             Object.entries(users).map(([userName, user]) => {
                 const {risk, complexity, effort, score} = {...user};
-                return <Row key={userName}><Col>{userName}</Col><Col>{risk}</Col><Col>{complexity}</Col><Col>{effort}</Col><Col>{score}</Col></Row>
+                if (displayEstimations) {
+                  return <Row key={userName}><Col>{userName}</Col><Col>{risk}</Col><Col>{complexity}</Col><Col>{effort}</Col><Col>{score}</Col></Row>
+                } else {
+                  return <Row key={userName}><Col>{userName}</Col><Col>hidden</Col><Col>hidden</Col><Col>hidden</Col><Col>hidden</Col></Row>
+                }
+                
             })
           }
         </Container>

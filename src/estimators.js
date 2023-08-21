@@ -45,6 +45,7 @@ const levelToInt = (level) => {
 export const estimatorsSlice = createSlice({
   name: 'estimators',
   initialState: {
+    showEstimations: false,
     users: { 
             "rob": {
                 "risk": "low",
@@ -61,6 +62,18 @@ export const estimatorsSlice = createSlice({
         }
   },
   reducers: {
+    showEstimations: (state, action) => {
+        return {
+            ...state,
+            showEstimations: true,
+        };
+    },
+    hideEstimations: (state, action) => {
+        return {
+            ...state,
+            showEstimations: false,
+        };
+    },
     updateComplexity: (state, action) => {
         const [user, level] = action.payload;
         //TODO: dont modify the state directly here
@@ -85,9 +98,11 @@ export const estimatorsSlice = createSlice({
 function selectUsers(state) {
     return state.estimator.users;
 }
+const selectShowEstimations = (state) => state.estimator.showEstimations;
+    
 
 // Action creators are generated for each case reducer function
-const { updateComplexity, updateRisk } = estimatorsSlice.actions
-export { updateComplexity, updateRisk, selectUsers };
+const { updateComplexity, updateRisk, showEstimations, hideEstimations } = estimatorsSlice.actions
+export { updateComplexity, updateRisk, selectUsers, selectShowEstimations, showEstimations, hideEstimations};
 
 export default estimatorsSlice.reducer
