@@ -47,14 +47,17 @@ export const estimatorsSlice = createSlice({
   name: 'estimators',
   initialState: {
     showEstimations: true,
+    localUser: "john",
     users: { 
             "rob": {
+                "id": 1,
                 "risk": "low",
                 "complexity": "medium",
                 "effort": "high",
                 "score": 5
             },
             "john": {
+                "id": 2,
                 "risk": "low",
                 "complexity": "medium",
                 "effort": "high",
@@ -63,6 +66,26 @@ export const estimatorsSlice = createSlice({
         }
   },
   reducers: {
+    updateLocalUserName: (state, action) => {
+        /**
+         * Updates the name in two places:
+         * (1) localUser name and...
+         * (2) updates the users object use the new name as the key
+         * Example: name="bob" (replacing "rob")
+         * {localUser: "bob", users: {"bob": {...}}}
+         */
+        const [name] = action.payload;  
+        const newUsers = {...state["users"]};
+        const oldlocalUser = state["localUser"];
+        const oldUserData = {...newUsers[oldlocalUser]};
+        delete newUsers[oldlocalUser];
+        newUsers[name] = oldUserData
+        return {
+            ...state,
+            localUser: name,
+            users: newUsers,
+        }
+    },
     clear: (state, action) => {
         const users = state["users"];
         const newUsers = {...users};
@@ -91,7 +114,7 @@ export const estimatorsSlice = createSlice({
     },
     updateComplexity: (state, action) => {
         const [user, level] = action.payload;
-        //TODO: dont modify the state directly here
+        //TODO: dont modify the state directly here; DRY THESE OUT!!
         const {risk, complexity, effort} = state["users"][user];
         state["users"][user]["complexity"] = level;
         const newScore = calculateScore({risk, complexity: level, effort})
@@ -124,10 +147,11 @@ function selectUsers(state) {
     return state.estimator.users;
 }
 const selectShowEstimations = (state) => state.estimator.showEstimations;
+const selectLocalUser = (state) => state.estimator.localUser;
     
 
 // Action creators are generated for each case reducer function
-const { updateComplexity, updateRisk, updateEffort, showEstimations, hideEstimations, clear } = estimatorsSlice.actions
-export { updateComplexity, updateRisk, updateEffort, selectUsers, selectShowEstimations, showEstimations, hideEstimations, clear};
+const { updateComplexity, updateRisk, updateEffort, updateLocalUserName, showEstimations, hideEstimations, clear } = estimatorsSlice.actions
+export { updateComplexity, updateRisk, updateEffort, updateLocalUserName, selectUsers, selectLocalUser, selectShowEstimations, showEstimations, hideEstimations, clear};
 
 export default estimatorsSlice.reducer
