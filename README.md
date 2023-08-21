@@ -1,13 +1,14 @@
-# Getting Started with Create React App
-
+# Background
 
 Provides a scrum poker like board for folks to estimate projects based on 3 categories (risk, complexity and effort) instead of just a fibonacci number alone. 
 
-## Available Scripts
+
 
 In the project directory, you can run:
 
 ### `npm start`
+
+cd estimations && npm start
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
@@ -69,3 +70,12 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+# Backlog
+1. Objective: Get the estimation board working locally
+a. Get Effort working
+b. Be able to enter your name
+c. Get clear working 
+2. Get the estimation board to work remotely for multiple users
+a. node.js with express running
