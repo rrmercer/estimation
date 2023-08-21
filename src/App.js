@@ -5,7 +5,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { updateComplexity, updateRisk, selectUsers } from './estimators';
 
@@ -35,26 +35,9 @@ const Section = ({title, initLevel, user, updateLevel}) => {
 
 }
 
-const levelToInt = (level) => {
-  if (level === "low") {
-    return 1;
-  }
-  if (level === "medium") {
-    return 2;
-  }
-  if (level === "3") {
-    return 3;
-  }
-}
-const calculateScore = ({risk, complexity, effort}) => {
-    const intRisk = levelToInt(risk);
-    const intComplexity = levelToInt(complexity);
-    const intEffort = levelToInt(effort);
-}
 
 function App() {
   const users = useSelector(selectUsers);
-
   return (
     <div className="App">
       
@@ -78,8 +61,8 @@ function App() {
           </Row>
           {
             Object.entries(users).map(([userName, user]) => {
-                const {risk, complexity, effort} = {...user};
-                return <Row key={userName}><Col>{userName}</Col><Col>{risk}</Col><Col>{complexity}</Col><Col>{effort}</Col><Col>0</Col></Row>
+                const {risk, complexity, effort, score} = {...user};
+                return <Row key={userName}><Col>{userName}</Col><Col>{risk}</Col><Col>{complexity}</Col><Col>{effort}</Col><Col>{score}</Col></Row>
             })
           }
         </Container>
