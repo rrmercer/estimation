@@ -74,9 +74,12 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 # Backlog
 1. Objective: Get the estimation board working locally
-a. Get Effort working
+a. Get Effort working - DONE 
 b. Be able to enter your name
-c. Get clear working 
+c. Get clear working  - DONE 
 // TODO: remove? how to handle if the user has not put in one of the three levels?
 2. Get the estimation board to work remotely for multiple users
 a. node.js with express running
+3. Fix usability and display issues
+a. add some padding to the top and center all the things/fix spacing between clear and show button, add a background to the top row of the table
+b. 

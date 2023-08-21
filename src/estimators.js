@@ -32,9 +32,6 @@ const levelToInt = (level) => {
       const intComplexity = levelToInt(complexity);
       const intEffort = levelToInt(effort);
 
-      //console.log(` nextFib(2) = ${ nextFib(2)}`);
-      //console.log(nextFib(1 + nextFib(2)));
-  
       if (risk === "low") {
         return nextFib(intComplexity + intEffort - 1);
       }
@@ -97,7 +94,19 @@ export const estimatorsSlice = createSlice({
         //TODO: dont modify the state directly here
         const {risk, complexity, effort} = state["users"][user];
         state["users"][user]["complexity"] = level;
-        state["users"][user]["score"] = calculateScore({risk, complexity: level, effort});
+        const newScore = calculateScore({risk, complexity: level, effort})
+        state["users"][user]["score"] = newScore;
+
+        return state;
+    },
+    updateEffort: (state, action) => {
+        const [user, level] = action.payload;
+        //TODO: dont modify the state directly here
+        const {risk, complexity, effort} = state["users"][user];
+        state["users"][user]["effort"] = level;
+        const newScore = calculateScore({risk, complexity, effort: level})
+        state["users"][user]["score"] = newScore;
+
         return state;
     },
     updateRisk: (state, action) => {
@@ -118,7 +127,7 @@ const selectShowEstimations = (state) => state.estimator.showEstimations;
     
 
 // Action creators are generated for each case reducer function
-const { updateComplexity, updateRisk, showEstimations, hideEstimations, clear } = estimatorsSlice.actions
-export { updateComplexity, updateRisk, selectUsers, selectShowEstimations, showEstimations, hideEstimations, clear};
+const { updateComplexity, updateRisk, updateEffort, showEstimations, hideEstimations, clear } = estimatorsSlice.actions
+export { updateComplexity, updateRisk, updateEffort, selectUsers, selectShowEstimations, showEstimations, hideEstimations, clear};
 
 export default estimatorsSlice.reducer

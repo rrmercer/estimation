@@ -7,13 +7,17 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
-import { updateComplexity, updateRisk, selectUsers, selectShowEstimations, showEstimations, hideEstimations, clear } from './estimators';
+import { updateComplexity, updateRisk, updateEffort, selectUsers, selectShowEstimations, showEstimations, hideEstimations, clear } from './estimators';
 
-const Section = ({title, initLevel, user, updateLevel}) => {
+const Section = ({title, user, updateLevel}) => {
   const dispatch = useDispatch();
   const users = useSelector(selectUsers);
-  const [level, setLevel] = useState(initLevel);
-  
+  const displayEstimations = useSelector(selectShowEstimations);
+  const level = useMemo(() => {
+    if (user in users) {
+      return users[user][title.toLowerCase()];
+    }
+  }, [user, title, displayEstimations, users]);
 
   return (
     <Card style={{ width: '18rem' }}>
@@ -23,11 +27,11 @@ const Section = ({title, initLevel, user, updateLevel}) => {
         
         <ButtonGroup aria-label="Basic example">
           <Button variant={level === "low" ? "primary" : "secondary"} 
-            onClick={() => {setLevel("low"); dispatch(updateLevel([user, "low"]))}}>Low</Button>
+            onClick={() => { dispatch(updateLevel([user, "low"]))}}>Low</Button>
           <Button variant={level === "medium" ? "primary" : "secondary"} 
-            onClick={() => {setLevel("medium"); dispatch(updateLevel([user, "medium"]))}}>Medium</Button>
+            onClick={() => { dispatch(updateLevel([user, "medium"]))}}>Medium</Button>
           <Button variant={level === "high" ? "primary" : "secondary"} 
-            onClick={() => {setLevel("high"); dispatch(updateLevel([user, "high"]))}}>
+            onClick={() => { dispatch(updateLevel([user, "high"]))}}>
               High
           </Button>
         </ButtonGroup>
@@ -57,9 +61,9 @@ function App() {
       <header className="App-header">
         <Container>
           <Row>
-            <Col><Section title="Risk" initLevel={users[localUser]["risk"]} user={localUser} updateLevel={updateRisk} /></Col>
-            <Col><Section title="Complexity" initLevel={users[localUser]["complexity"]} user={localUser} updateLevel={updateComplexity}/></Col>
-            <Col><Section title="Effort" /></Col>
+            <Col><Section title="Risk" user={localUser} updateLevel={updateRisk} /></Col>
+            <Col><Section title="Complexity" user={localUser} updateLevel={updateComplexity}/></Col>
+            <Col><Section title="Effort" user={localUser} updateLevel={updateEffort} /></Col>
           </Row>
           <Row>
             <Col> 
