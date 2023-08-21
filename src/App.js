@@ -12,9 +12,8 @@ import { updateComplexity, updateRisk, selectUsers, selectShowEstimations, showE
 const Section = ({title, initLevel, user, updateLevel}) => {
   const dispatch = useDispatch();
   const users = useSelector(selectUsers);
-  const [level, setLevel] = useState();
+  const [level, setLevel] = useState(initLevel);
   
-  //users["rob"]["risk"]
 
   return (
     <Card style={{ width: '18rem' }}>
@@ -58,8 +57,8 @@ function App() {
       <header className="App-header">
         <Container>
           <Row>
-            <Col><Section title="Risk" initLevel={users["rob"]["risk"]} user={localUser} updateLevel={updateRisk} /></Col>
-            <Col><Section title="Complexity" initLevel={users["rob"]["complexity"]} user={localUser} updateLevel={updateComplexity}/></Col>
+            <Col><Section title="Risk" initLevel={users[localUser]["risk"]} user={localUser} updateLevel={updateRisk} /></Col>
+            <Col><Section title="Complexity" initLevel={users[localUser]["complexity"]} user={localUser} updateLevel={updateComplexity}/></Col>
             <Col><Section title="Effort" /></Col>
           </Row>
           <Row>

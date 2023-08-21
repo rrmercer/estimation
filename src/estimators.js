@@ -11,6 +11,7 @@ const levelToInt = (level) => {
     if (level === "high") {
       return 3;
     }
+    return 1;// TODO: remove? how to handle if the user has not put in one of the three levels?
   }
   /**
    * 

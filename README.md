@@ -77,5 +77,6 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 a. Get Effort working
 b. Be able to enter your name
 c. Get clear working 
+// TODO: remove? how to handle if the user has not put in one of the three levels?
 2. Get the estimation board to work remotely for multiple users
 a. node.js with express running
