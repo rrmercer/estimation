@@ -1,14 +1,17 @@
 # Background
 
-Provides a scrum poker like board for folks to estimate projects based on 3 categories (risk, complexity and effort) instead of just a fibonacci number alone. 
+Provides a scrum poker like board for folks to estimate projects based on 3 categories (risk, complexity and effort) instead of just a fibonacci number alone. Also, because the scrum estimation board we currently use is sketchy and takes forever to load I wanted one of my own that's open source.
 
+![Estimation Board](image.png)
 
 
 In the project directory, you can run:
 
 ### `npm start`
 
-cd estimations && npm start
+cd estimations && npm start 
+
+in another window: cd estimations/web-server && node src/app.js
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.

@@ -62,7 +62,7 @@ const UserName = (props) => {
 
 function App() {
   const dispatch = useDispatch();
-  const users = useSelector(selectUsers);
+  var users = useSelector(selectUsers);
   const displayEstimations = useSelector(selectShowEstimations);
   const localUser = useSelector(selectLocalUser);
 
@@ -74,6 +74,23 @@ function App() {
     }
   }, [displayEstimations]);
   
+  useEffect(() => {
+    const fetchUsers = async () => {
+      let response = await fetch("http://192.168.1.230:4000/estimation"); // TODO: uri as a variable
+      
+      if (!response.ok) {
+        const message = `An error has occured: ${response.status}`;
+        throw new Error(message);
+      } else {
+        return response.json();
+      }
+      
+      
+    };
+    //console.log(fetchUsers());  
+    users = fetchUsers();
+  });
+
   return (
     <div className="App">
       
