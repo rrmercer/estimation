@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { v4 as uuidv4 } from 'uuid';
+import backendUrl from './utils.js';
 
 const levelToInt = (level) => {
     if (level === "low") {
@@ -12,60 +13,52 @@ const levelToInt = (level) => {
       return 3;
     }
     return 1;// TODO: remove? how to handle if the user has not put in one of the three levels?
-  }
-  /**
-   * 
-   * @param {} start 
-   * @returns 
-   */
-  const nextFib = (start) => {
-    const fib = [1,2,3,5,8,13];
-    for (let i = 0; i < fib.length; i++) {
-      if (start <= fib[i]) {
-        return fib[i];
-      }
+}
+/**
+ * 
+ * @param {} start 
+ * @returns 
+ */
+const nextFib = (start) => {
+const fib = [1,2,3,5,8,13];
+for (let i = 0; i < fib.length; i++) {
+    if (start <= fib[i]) {
+    return fib[i];
     }
-    return 13;
-  }
+}
+return 13;
+}
+
+const calculateScore = ({risk, complexity, effort}) => {
+    const intComplexity = levelToInt(complexity);
+    const intEffort = levelToInt(effort);
+
+    if (risk === "low") {
+    return nextFib(intComplexity + intEffort - 1);
+    }
+    if (risk === "medium") {
+    return nextFib(1 + nextFib(intComplexity + intEffort - 1)); // take the -1 off here?
+    } 
+    if (risk === "high") {
+    return nextFib(1+ nextFib(1 + nextFib(1 + nextFib(intComplexity + intEffort - 1))));
+    }
+}
   
-  const calculateScore = ({risk, complexity, effort}) => {
-      const intComplexity = levelToInt(complexity);
-      const intEffort = levelToInt(effort);
-
-      if (risk === "low") {
-        return nextFib(intComplexity + intEffort - 1);
-      }
-      if (risk === "medium") {
-        return nextFib(1 + nextFib(intComplexity + intEffort - 1)); // take the -1 off here?
-      } 
-      if (risk === "high") {
-        return nextFib(1+ nextFib(1 + nextFib(1 + nextFib(intComplexity + intEffort - 1))));
-      }
-  }
-
 export const estimatorsSlice = createSlice({
   name: 'estimators',
   initialState: {
     showEstimations: true,
     localUser: "rob",
-    users: { 
-            "rob": {
-                "id": 1,
-                "risk": "low",
-                "complexity": "medium",
-                "effort": "high",
-                "score": 5
-            },
-            "john": {
-                "id": 2,
-                "risk": "low",
-                "complexity": "medium",
-                "effort": "high",
-                "score": 5
-            }
-        }
+    users: {}
   },
   reducers: {
+    setInitialUsers: (state, action) => {
+        const [result] = action.payload;
+        return {
+            ...state,
+            users: result["users"],
+        }
+    },
     updateLocalUserName: (state, action) => {
         /**
          * Updates the name in two places:
@@ -102,12 +95,26 @@ export const estimatorsSlice = createSlice({
         return {...state, users: newUsers};
     },
     showEstimations: (state, action) => {
+        (async () => {
+            await fetch(backendUrl("show_estimations"), 
+                {
+                    method: "PUT",
+                    body: JSON.stringify({showEstimations: true})
+                })
+        })();
         return {
             ...state,
             showEstimations: true,
         };
     },
     hideEstimations: (state, action) => {
+        (async () => {
+            await fetch(backendUrl("show_estimations"), 
+                {
+                    method: "PUT",
+                    body: JSON.stringify({showEstimations: false})
+                })
+        })();
         return {
             ...state,
             showEstimations: false,
@@ -152,7 +159,7 @@ const selectLocalUser = (state) => state.estimator.localUser;
     
 
 // Action creators are generated for each case reducer function
-const { updateComplexity, updateRisk, updateEffort, updateLocalUserName, showEstimations, hideEstimations, clear } = estimatorsSlice.actions
-export { updateComplexity, updateRisk, updateEffort, updateLocalUserName, selectUsers, selectLocalUser, selectShowEstimations, showEstimations, hideEstimations, clear};
+const { updateComplexity, updateRisk, updateEffort, updateLocalUserName, setInitialUsers, showEstimations, hideEstimations, clear } = estimatorsSlice.actions
+export { updateComplexity, updateRisk, updateEffort, updateLocalUserName, setInitialUsers, selectUsers, selectLocalUser, selectShowEstimations, showEstimations, hideEstimations, clear};
 
 export default estimatorsSlice.reducer

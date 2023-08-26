@@ -6,9 +6,10 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
-import { updateComplexity, updateRisk, updateEffort, updateLocalUserName, selectUsers, selectShowEstimations, selectLocalUser, showEstimations, hideEstimations, clear } from './estimators';
+import { updateComplexity, updateRisk, updateEffort, updateLocalUserName, setInitialUsers, selectUsers, selectShowEstimations, selectLocalUser, showEstimations, hideEstimations, clear } from './estimators';
+import backendUrl from './utils.js';
 
 const Section = ({title, user, updateLevel}) => {
   const dispatch = useDispatch();
@@ -61,11 +62,12 @@ const UserName = (props) => {
 }
 
 function App() {
+  const POLLING_RATE = 1000; // 1 second
+  
   const dispatch = useDispatch();
   var users = useSelector(selectUsers);
   const displayEstimations = useSelector(selectShowEstimations);
   const localUser = useSelector(selectLocalUser);
-
   const showOrHideButton = useMemo(() => {
     if (displayEstimations) {
       return  <Button variant="secondary" onClick={() => {dispatch(hideEstimations());}}>Hide</Button>
@@ -74,23 +76,38 @@ function App() {
     }
   }, [displayEstimations]);
   
+  
+
+  // Initial load of users from backend
   useEffect(() => {
-    const fetchUsers = async () => {
-      let response = await fetch("http://192.168.1.230:4000/estimation"); // TODO: uri as a variable
+    (async () => {
+      let response = await fetch(backendUrl("estimation")); // TODO: uri as a variable
       
       if (!response.ok) {
         const message = `An error has occured: ${response.status}`;
         throw new Error(message);
       } else {
-        return response.json();
+        const result = await response.json();
+        dispatch(setInitialUsers([result]));
+        //TODO: dispatch(setHideShowEstimations)
+        return result;
       }
       
-      
-    };
-    //console.log(fetchUsers());  
-    users = fetchUsers();
-  });
-
+    })();
+  }, []);
+  
+  // poll backend for changes to users every 500ms
+  // const updateState = useCallback(async () => {
+  //   // TODO: dry out with initial load
+  //   let response = await fetch(backendUrl("estimation"));
+  //   const data = await response.json();
+  //   dispatch(setInitialUsers([data]));
+  // }, []);
+  // useEffect(() => {
+  //   setInterval(updateState, POLLING_RATE);
+  // }, [updateState]);
+  
+  console.log(`usersFromAPI = ${JSON.stringify(users)}`);  
   return (
     <div className="App">
       
