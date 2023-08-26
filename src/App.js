@@ -10,6 +10,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { updateComplexity, updateRisk, updateEffort, updateLocalUserName, setInitialUsers, selectUsers, selectShowEstimations, selectLocalUser, showEstimations, hideEstimations, clear } from './estimators';
 import backendUrl from './utils.js';
+import { useSearchParams } from "react-router-dom";
 
 const Section = ({title, user, updateLevel}) => {
   const dispatch = useDispatch();
@@ -61,9 +62,8 @@ const UserName = (props) => {
 }
 
 function App() {
-  
-  
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams(); 
   var users = useSelector(selectUsers);
   const displayEstimations = useSelector(selectShowEstimations);
   const localUser = useSelector(selectLocalUser);
@@ -75,8 +75,6 @@ function App() {
     }
   }, [dispatch, displayEstimations]);
   
-  
-
   // Initial load of users from backend
   useEffect(() => {
     (async () => {
@@ -106,6 +104,12 @@ function App() {
   // useEffect(() => {
   //   setInterval(updateState, POLLING_RATE);
   // }, [updateState]);
+  
+  const password = searchParams.get("password");
+  if (password !== "lilpassword!") {
+    console.error(`wrong password ${JSON.stringify(password)}`);
+    return <></>;
+  }
   
   console.log(`usersFromAPI = ${JSON.stringify(users)}`);  
   return (

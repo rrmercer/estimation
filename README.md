@@ -2,6 +2,9 @@
 
 Provides a scrum poker like board for folks to estimate projects based on 3 categories (risk, complexity and effort) instead of just a fibonacci number alone. Also, because the scrum estimation board we currently use is sketchy and takes forever to load I wanted one of my own that's open source.
 
+Note: Password! To protect my site from whatever/robots you need to add ?password=lilpassword! on the end of the below:
+Test site: https://estimations-test-board.netlify.app
+
 ![Estimation Board](image.png)
 
 
