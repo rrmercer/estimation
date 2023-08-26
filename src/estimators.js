@@ -123,7 +123,7 @@ export const estimatorsSlice = createSlice({
     updateComplexity: (state, action) => {
         const [user, level] = action.payload;
         //TODO: dont modify the state directly here; DRY THESE OUT!!
-        const {risk, complexity, effort} = state["users"][user];
+        const {risk, effort} = state["users"][user];
         state["users"][user]["complexity"] = level;
         const newScore = calculateScore({risk, complexity: level, effort})
         state["users"][user]["score"] = newScore;
@@ -133,7 +133,7 @@ export const estimatorsSlice = createSlice({
     updateEffort: (state, action) => {
         const [user, level] = action.payload;
         //TODO: dont modify the state directly here
-        const {risk, complexity, effort} = state["users"][user];
+        const {risk, complexity } = state["users"][user];
         state["users"][user]["effort"] = level;
         const newScore = calculateScore({risk, complexity, effort: level})
         state["users"][user]["score"] = newScore;
@@ -143,7 +143,7 @@ export const estimatorsSlice = createSlice({
     updateRisk: (state, action) => {
         const [user, level] = action.payload;
         //TODO: dont modify the state directly here
-        const {risk, complexity, effort} = state["users"][user];
+        const {complexity, effort} = state["users"][user];
         state["users"][user]["risk"] = level;
         state["users"][user]["score"] = calculateScore({risk: level, complexity, effort});
         return state;

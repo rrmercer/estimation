@@ -6,7 +6,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { updateComplexity, updateRisk, updateEffort, updateLocalUserName, setInitialUsers, selectUsers, selectShowEstimations, selectLocalUser, showEstimations, hideEstimations, clear } from './estimators';
 import backendUrl from './utils.js';
@@ -62,7 +62,7 @@ const UserName = (props) => {
 }
 
 function App() {
-  const POLLING_RATE = 1000; // 1 second
+  
   
   const dispatch = useDispatch();
   var users = useSelector(selectUsers);
@@ -96,6 +96,7 @@ function App() {
     })();
   }, []);
   
+  //const POLLING_RATE = 1000; // 1 second
   // poll backend for changes to users every 500ms
   // const updateState = useCallback(async () => {
   //   // TODO: dry out with initial load
