@@ -14,12 +14,11 @@ import backendUrl from './utils.js';
 const Section = ({title, user, updateLevel}) => {
   const dispatch = useDispatch();
   const users = useSelector(selectUsers);
-  //const displayEstimations = useSelector(selectShowEstimations);
   const level = useMemo(() => {
     if (user in users) {
       return users[user][title.toLowerCase()];
     }
-  }, [user, title, users]); // TODO: add this back: displayEstimations
+  }, [user, title, users]);
 
   return (
     <Card style={{ width: '18rem' }}>
@@ -74,7 +73,7 @@ function App() {
     } else {
       return <Button variant="primary" onClick={() => {dispatch(showEstimations());}}>Show</Button>
     }
-  }, [dispatch, displayEstimations]); //TODO: likely broken, displayEstimations
+  }, [dispatch, displayEstimations]);
   
   
 
