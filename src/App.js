@@ -14,12 +14,12 @@ import backendUrl from './utils.js';
 const Section = ({title, user, updateLevel}) => {
   const dispatch = useDispatch();
   const users = useSelector(selectUsers);
-  const displayEstimations = useSelector(selectShowEstimations);
+  //const displayEstimations = useSelector(selectShowEstimations);
   const level = useMemo(() => {
     if (user in users) {
       return users[user][title.toLowerCase()];
     }
-  }, [user, title, displayEstimations, users]);
+  }, [user, title, users]); // TODO: add this back: displayEstimations
 
   return (
     <Card style={{ width: '18rem' }}>
@@ -74,7 +74,7 @@ function App() {
     } else {
       return <Button variant="primary" onClick={() => {dispatch(showEstimations());}}>Show</Button>
     }
-  }, [displayEstimations]);
+  }, [dispatch, displayEstimations]); //TODO: likely broken, displayEstimations
   
   
 
@@ -94,7 +94,7 @@ function App() {
       }
       
     })();
-  }, []);
+  }, [dispatch]);
   
   //const POLLING_RATE = 1000; // 1 second
   // poll backend for changes to users every 500ms
