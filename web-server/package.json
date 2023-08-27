@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "./node_modules/.bin/netlify-lambda serve src",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider && ./node_modules/.bin/netlify-lambda build src"
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider && ./node_modules/.bin/netlify-lambda build src",
+    "localbuild": "export NODE_OPTIONS=--openssl-legacy-provider && ./node_modules/.bin/netlify-lambda build src"
   },
   "keywords": [],
   "author": "",
