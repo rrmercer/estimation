@@ -51,6 +51,6 @@ app.put("/show_estimations", (req, res) => {
     res.send({status: "OK"});
 })
 
-app.listen(() =>  {
+app.listen(4000, () =>  {
     console.log("Server is up!");
 });
