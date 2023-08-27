@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors');
 const bodyParser = require('body-parser')
 
+
 const app = express();
 
 const state = {
@@ -50,6 +51,6 @@ app.put("/show_estimations", (req, res) => {
     res.send({status: "OK"});
 })
 
-app.listen(4000, () =>  {
-    console.log("Server is up on port 4000");
+app.listen(() =>  {
+    console.log("Server is up!");
 });
