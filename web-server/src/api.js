@@ -55,8 +55,21 @@ router.put("/show_estimations", (req, res) => {
   res.send({status: "OK"});
 });
 
-router.put("/effort", (req, res) => {
-  //state
+router.put("/estimate", (req, res) => {
+  // Example req body: {user: user, newScore: newScore, "effort": level})
+  const {user, newScore, effort, risk, complexity} = req.body; 
+  if (effort) {
+    state["users"][user]["effort"] = effort;
+  }
+  if (risk) {
+    state["users"][user]["risk"] = risk;
+  }
+  if (complexity) {
+    state["users"][user]["complexity"] = complexity;
+  }
+  state["users"][user]["score"] = newScore;
+
+  console.log(`After estimate put ${JSON.stringify(state)}`);
   res.send({status: "OK"})
 })
 

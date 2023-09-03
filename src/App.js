@@ -6,9 +6,9 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
-import { updateComplexity, updateRisk, updateEffort, updateLocalUserName, setInitialUsers, selectUsers, selectShowEstimations, selectLocalUser, showEstimations, hideEstimations, clear } from './estimators';
+import { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, selectUsers, selectShowEstimations, selectLocalUser, showEstimations, hideEstimations, clear } from './estimators';
 import backendUrl from './utils.js';
 import { useSearchParams } from "react-router-dom";
 
@@ -85,7 +85,7 @@ function App() {
         throw new Error(message);
       } else {
         const result = await response.json();
-        dispatch(setInitialUsers([result]));
+        dispatch(updateFromBackend([result]));
         //TODO: dispatch(setHideShowEstimations)
         return result;
       }
@@ -93,17 +93,18 @@ function App() {
     })();
   }, [dispatch]);
   
-  //const POLLING_RATE = 1000; // 1 second
-  // poll backend for changes to users every 500ms
-  // const updateState = useCallback(async () => {
-  //   // TODO: dry out with initial load
-  //   let response = await fetch(backendUrl("estimation"));
-  //   const data = await response.json();
-  //   dispatch(setInitialUsers([data]));
-  // }, []);
-  // useEffect(() => {
-  //   setInterval(updateState, POLLING_RATE);
-  // }, [updateState]);
+  const POLLING_RATE = 2000; // 2 seconds
+  //poll backend for changes to users every 500ms
+  const updateState = useCallback(async () => {
+    // TODO: dry out with initial load, do we need both?
+    let response = await fetch(backendUrl("estimation"));
+    const data = await response.json();
+    dispatch(updateFromBackend([data]));
+  }, []);
+
+  useEffect(() => {
+    setInterval(updateState, POLLING_RATE);
+  }, [updateState]);
   
   const password = searchParams.get("password");
   if (password !== "lilpassword!") {

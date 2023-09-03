@@ -65,10 +65,11 @@ export const estimatorsSlice = createSlice({
     users: {}
   },
   reducers: {
-    setInitialUsers: (state, action) => {
+    updateFromBackend: (state, action) => {
         const [result] = action.payload;
         return {
             ...state,
+            showEstimations: result["showEstimations"],
             users: result["users"],
         }
     },
@@ -108,16 +109,6 @@ export const estimatorsSlice = createSlice({
         return {...state, users: newUsers};
     },
     showEstimations: (state, action) => {
-        // (async () => {
-        //     await fetch(backendUrl("show_estimations"), 
-        //         {
-        //             method: "PUT",
-        //             headers: {
-        //                 "Content-Type": "application/json",
-        //               },
-        //             body: JSON.stringify({showEstimations: true})
-        //         })
-        // })();
         put(backendUrl("show_estimations"), {showEstimations: true});
         return {
             ...state,
@@ -125,16 +116,6 @@ export const estimatorsSlice = createSlice({
         };
     },
     hideEstimations: (state, action) => {
-        // (async () => {
-        //     await fetch(backendUrl("show_estimations"), 
-        //         {
-        //             method: "PUT",
-        //             headers: {
-        //                 "Content-Type": "application/json",
-        //               },
-        //             body: JSON.stringify({showEstimations: false})
-        //         })
-        // })();
         put(backendUrl("show_estimations"), {showEstimations: false});
         return {
             ...state,
@@ -159,6 +140,7 @@ export const estimatorsSlice = createSlice({
         state["users"][user]["effort"] = level;
         const newScore = calculateScore({risk, complexity, effort: level})
         state["users"][user]["score"] = newScore;
+        put(backendUrl("estimate"), {user: user, newScore: newScore, "effort": level}); 
 
         return state;
     },
@@ -167,7 +149,9 @@ export const estimatorsSlice = createSlice({
         //TODO: dont modify the state directly here
         const {complexity, effort} = state["users"][user];
         state["users"][user]["risk"] = level;
-        state["users"][user]["score"] = calculateScore({risk: level, complexity, effort});
+        const newScore = calculateScore({risk: level, complexity, effort});
+        state["users"][user]["score"] = newScore;
+        put(backendUrl("estimate"), {user: user, newScore: newScore, "risk": level}); 
         return state;
     },
   },
@@ -181,7 +165,7 @@ const selectLocalUser = (state) => state.estimator.localUser;
     
 
 // Action creators are generated for each case reducer function
-const { updateComplexity, updateRisk, updateEffort, updateLocalUserName, setInitialUsers, showEstimations, hideEstimations, clear } = estimatorsSlice.actions
-export { updateComplexity, updateRisk, updateEffort, updateLocalUserName, setInitialUsers, selectUsers, selectLocalUser, selectShowEstimations, showEstimations, hideEstimations, clear};
+const { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, showEstimations, hideEstimations, clear } = estimatorsSlice.actions
+export { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, selectUsers, selectLocalUser, selectShowEstimations, showEstimations, hideEstimations, clear};
 
 export default estimatorsSlice.reducer
