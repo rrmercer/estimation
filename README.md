@@ -10,14 +10,16 @@ Test site: https://estimations-test-board.netlify.app
 
 In the project directory, you can run:
 
-### `npm start`
+### Starting
 
-cd estimations && npm start 
+Frontend:
+cd estimation && export REACT_APP_BACKEND_URL=<netlify_backend_url> && npm start 
 
-in another window: cd estimations/web-server && node src/app.js
+Backend: (in another window)
+cd estimation/web-server && npm run localbuild && npm run start
 
 Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Open [http://localhost:3000?password=<SEE ABOVE>](http://localhost:3000?password=<SEE ABOVE>) to view it in your browser.
 
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
@@ -85,14 +87,20 @@ b. Be able to enter your name - DONE
 c. Get clear working  - DONE 
 
 2. Get the estimation board to work remotely for multiple users
-a. node.js with express running
+a. node.js with express running -DONE
 b. // TODO: remove? how to handle if the user has not put in one of the three levels?
-- Gonna need a polling function
-- Push the whole state up everytime. Only update your row with estimations.
+c. Gonna need a polling function - DONE
+d. Push the whole local user state (risk/effort/complexity) state up everytime. Only update your row with estimations.
+e. Switch from CRA to vite! omg... when did that die...?
+f. environment variables with vite!
+g. cors fixes
+
+---- MVP ----
 
 3. Fix usability and display issues
 a. add some padding to the top and center all the things/fix spacing between clear and show button, add a background to the top row of the table
 b. better png/card for hidden values. Better png/card for values not entered
+
 
 4. Allow for multiple boards
 

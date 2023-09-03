@@ -43,6 +43,19 @@ const calculateScore = ({risk, complexity, effort}) => {
     return nextFib(1+ nextFib(1 + nextFib(1 + nextFib(intComplexity + intEffort - 1))));
     }
 }
+
+const put = (url, body) => {
+    (async () => {
+        await fetch(url, 
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                  },
+                body: JSON.stringify(body)
+            })
+    })();
+}
   
 export const estimatorsSlice = createSlice({
   name: 'estimators',
@@ -95,26 +108,34 @@ export const estimatorsSlice = createSlice({
         return {...state, users: newUsers};
     },
     showEstimations: (state, action) => {
-        (async () => {
-            await fetch(backendUrl("show_estimations"), 
-                {
-                    method: "PUT",
-                    body: JSON.stringify({showEstimations: true})
-                })
-        })();
+        // (async () => {
+        //     await fetch(backendUrl("show_estimations"), 
+        //         {
+        //             method: "PUT",
+        //             headers: {
+        //                 "Content-Type": "application/json",
+        //               },
+        //             body: JSON.stringify({showEstimations: true})
+        //         })
+        // })();
+        put(backendUrl("show_estimations"), {showEstimations: true});
         return {
             ...state,
             showEstimations: true,
         };
     },
     hideEstimations: (state, action) => {
-        (async () => {
-            await fetch(backendUrl("show_estimations"), 
-                {
-                    method: "PUT",
-                    body: JSON.stringify({showEstimations: false})
-                })
-        })();
+        // (async () => {
+        //     await fetch(backendUrl("show_estimations"), 
+        //         {
+        //             method: "PUT",
+        //             headers: {
+        //                 "Content-Type": "application/json",
+        //               },
+        //             body: JSON.stringify({showEstimations: false})
+        //         })
+        // })();
+        put(backendUrl("show_estimations"), {showEstimations: false});
         return {
             ...state,
             showEstimations: false,
@@ -127,6 +148,7 @@ export const estimatorsSlice = createSlice({
         state["users"][user]["complexity"] = level;
         const newScore = calculateScore({risk, complexity: level, effort})
         state["users"][user]["score"] = newScore;
+        put(backendUrl("estimate"), {user: user, newScore: newScore, "complexity": level}); 
 
         return state;
     },

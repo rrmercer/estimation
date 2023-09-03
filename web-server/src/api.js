@@ -1,14 +1,16 @@
 const express = require("express");
 const serverless = require("serverless-http");
 const cors = require('cors');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 
 const app = express();
 
 app.use(cors({
   origin: '*' // TODO: fixme! this is too permissive
 }));
-app.use(bodyParser.json());
+const jsonParser = bodyParser.json()
+app.use(jsonParser);
+app.use(bodyParser.urlencoded({ extended: true }))
 
 const state = {
   showEstimations: true,
@@ -40,7 +42,7 @@ const state = {
 const router = express.Router();
 router.get("/", (req, res) => {
   res.json({
-    hello: "hi!"
+    status: "alive"
   });
 });
 
@@ -49,11 +51,14 @@ router.get("/estimation", (req, res) => {
 });
 
 router.put("/show_estimations", (req, res) => {
-  const reqBody = req.body;
-  console.log(`Received post at /show_estimations ${reqBody}`)
-  state.showEstimations = reqBody["showEstimations"];
+  state.showEstimations = req.body.showEstimations;
   res.send({status: "OK"});
 });
+
+router.put("/effort", (req, res) => {
+  //state
+  res.send({status: "OK"})
+})
 
 
 // Use the router to handle requests to the `/.netlify/functions/api` path
