@@ -42,25 +42,6 @@ const Section = ({title, user, updateLevel}) => {
   );
 }
 
-const UserName = (props) => {
-  const dispatch = useDispatch();
-  const localUser = useSelector(selectLocalUser);
-  const setLocalUserName = ({e}) => {
-    const name = e.target.value;
-    dispatch(updateLocalUserName([name]));
-  }
-  if (localUser === props.userName) {
-    return (
-      <Form>
-        <Form.Group className="mb-3" controlId="formBasicname">
-          <Form.Control type="text" placeholder="Enter your name" value={localUser} onChange={(e) => setLocalUserName({e})} />
-        </Form.Group>
-      </Form>
-      );
-  } 
-  return <>{props.userName}</>;
-}
-
 function App() {
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams(); 
@@ -86,14 +67,13 @@ function App() {
       } else {
         const result = await response.json();
         dispatch(updateFromBackend([result]));
-        //TODO: dispatch(setHideShowEstimations)
         return result;
       }
       
     })();
   }, [dispatch]);
   
-  const POLLING_RATE = 2000; // 2 seconds
+  const POLLING_RATE = 6000; // 2 seconds
   //poll backend for changes to users every 500ms
   const updateState = useCallback(async () => {
     // TODO: dry out with initial load, do we need both?
@@ -113,6 +93,11 @@ function App() {
   }
   
   console.log(`usersFromAPI = ${JSON.stringify(users)}`);  
+  const {localUserId, risk, complexity, effort, score} = {...users[localUser]};
+  const setLocalUserName = ({e}) => {
+    const name = e.target.value;
+    dispatch(updateLocalUserName([name]));
+  }
   return (
     <div className="App">
       
@@ -143,12 +128,29 @@ function App() {
             <Col>Effort</Col>
             <Col>Score</Col>
           </Row>
+          <Row key={localUserId}>
+              <Col>
+              <Form>
+                <Form.Group className="mb-3" controlId="formBasicname">
+                  <Form.Control type="text" placeholder="Enter your name" value={localUser} onChange={(e) => setLocalUserName({e})} />
+                </Form.Group>
+              </Form>
+              </Col>
+              <Col>{!risk ? "" : risk}</Col>
+              <Col>{!complexity ? "": complexity}</Col>
+              <Col>{!effort ? "": effort}</Col>
+              <Col>{score}</Col>
+          </Row>
+          
           {
             Object.entries(users).map(([userName, user]) => {
                 const {risk, complexity, effort, score} = {...user};
+                if (localUser === userName) {
+                  return <></>
+                }
                 if (displayEstimations) {
                   return <Row key={users[userName].id}>
-                    <Col><UserName userName={userName}></UserName></Col>
+                    <Col>{userName}</Col>
                     <Col>{!risk ? "" : risk}</Col>
                     <Col>{!complexity ? "": complexity}</Col>
                     <Col>{!effort ? "": effort}</Col>

@@ -61,16 +61,33 @@ export const estimatorsSlice = createSlice({
   name: 'estimators',
   initialState: {
     showEstimations: true,
-    localUser: "rob",
-    users: {}
+    localUser: "",
+    users: {
+        "": {
+            "risk": "",
+            "complexity": "",
+            "effort": "",
+            "score": "",
+            "id": uuidv4(),
+        }
+    }
   },
   reducers: {
     updateFromBackend: (state, action) => {
         const [result] = action.payload;
+        const localUser = state.localUser;
+        let newUsers = {...result["users"]};
+        // save localUser; dont overwrite it
+        if (localUser !== "") {
+            newUsers[localUser] = {...state["users"][localUser]};           
+        } 
+        
         return {
             ...state,
             showEstimations: result["showEstimations"],
-            users: result["users"],
+            users: {
+                ...newUsers
+            }
         }
     },
     updateLocalUserName: (state, action) => {
@@ -84,9 +101,21 @@ export const estimatorsSlice = createSlice({
         const [name] = action.payload;  
         const newUsers = {...state["users"]};
         const oldlocalUser = state["localUser"];
-        const oldUserData = {...newUsers[oldlocalUser]};
-        delete newUsers[oldlocalUser];
-        newUsers[name] = oldUserData
+        if (oldlocalUser !== "") {
+            const oldUserData = {...newUsers[oldlocalUser]};
+            delete newUsers[oldlocalUser];
+            newUsers[name] = oldUserData
+        } else {
+            // TOOD: necessary anymore?
+            newUsers[name] = {
+                "risk": "",
+                "complexity": "",
+                "effort": "",
+                "score": "",
+                "id": uuidv4(),
+            };
+        }
+        console.log(`update localusername ${JSON.stringify(newUsers)}`)
         return {
             ...state,
             localUser: name,
