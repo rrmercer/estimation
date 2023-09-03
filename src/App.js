@@ -80,7 +80,7 @@ function App() {
     let response = await fetch(backendUrl("estimation"));
     const data = await response.json();
     dispatch(updateFromBackend([data]));
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     setInterval(updateState, POLLING_RATE);
