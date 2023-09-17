@@ -96,6 +96,7 @@ c. Get clear working  - DONE
 - Switch from CRA to vite! omg... when did that die...?
 - cors fixes
 - // TODO: remove? how to handle if the user has not put in one of the three levels?
+- Make the id the identifier/primary key instead of the username
 
 ---- MVP ----
 

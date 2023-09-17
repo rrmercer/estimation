@@ -16,21 +16,21 @@ const state = {
   showEstimations: true,
   users: { 
       "rob": {
-          "id": 1,
+          "id": "1",
           "risk": "low",
           "complexity": "medium",
           "effort": "high",
           "score": 5
       },
       "john": {
-          "id": 2,
+          "id": "2",
           "risk": "low",
           "complexity": "medium",
           "effort": "high",
           "score": 5
       },
       "sally": {
-          "id": 3,
+          "id": "3",
           "risk": "low",
           "complexity": "medium",
           "effort": "high",
@@ -57,11 +57,19 @@ router.put("/show_estimations", (req, res) => {
 
 router.put("/estimate", (req, res) => {
   // Example req body: {user: user, newScore: newScore, "effort": level})
-  const {user, newScore, effort, risk, complexity} = req.body;
-   
+  const {id, user, newScore, effort, risk, complexity} = req.body;
+  console.log(`estimation called: updating ${user}`);
   if (!(user in state["users"])) {
     // if the user does not exist yet
     state["users"][user] = {}
+  }
+  if (id) {
+    // Note: this is pretty silly to use the username as the primary key instead of the id; 
+    // this should be fixed. It's because of how this program evolved that I started with username
+    // as the id and then added id to fix some react issues rendering rows in the ux.
+    // This is "alright" for now since the source of truth for the rows that are being updated here
+    // are on the locals; not this backend
+    state["users"][user]["id"] = id;
   }
   if (effort) {
     state["users"][user]["effort"] = effort;

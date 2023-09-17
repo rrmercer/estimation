@@ -79,6 +79,7 @@ function App() {
     setInterval(updateState, POLLING_RATE);
   }, [updateState]);
   
+  // wrap the whole tree in this little check to prevent folks from abusing the site
   const password = searchParams.get("password");
   if (password !== "lilpassword!") {
     console.error(`wrong password ${JSON.stringify(password)}`);
@@ -138,45 +139,43 @@ function App() {
             <DataTable
               keyField='id'
               columns={
-                          [{
-                              name: 'Name',
-                              selector: row => row.username,
-                              sortable: true,
-                              cell: (row, index, column, id) => {
-                                  return row["username"]
-                              }
-                          },
-                          {
-                            name: 'Risk',
-                            selector: row => row.risk,
-                            sortable: true,
-                            cell: (row, index, column, id) => {return displayEstimations ? row["risk"] : "hidden"}
-                          },
-                          {
-                            name: "Complexity",
-                            selector: row => row.complexity,
-                            sortable: true,
-                            cell: (row, index, column, id) => {return displayEstimations ? row["complexity"] : "hidden"}
-                          },
-                          {
-                            name: "Effort",
-                            selector: row => row.effort,
-                            sortable: true,
-                            cell: (row, index, column, id) => {return displayEstimations ? row["effort"] : "hidden"}
-                          },
-                          {
-                            name: "Score",
-                            selector: row => row.score,
-                            sortable: true,
-                            cell: (row, index, column, id) => {return displayEstimations ? row["score"] : "hidden"}
-                          }
+                    [{
+                        name: 'Name',
+                        selector: row => row.username,
+                        sortable: true,
+                        cell: (row, index, column, id) => {
+                            return row["username"] === null ? "Enter your username above!" : row["username"]
+                        }
+                    },
+                    {
+                      name: 'Risk',
+                      selector: row => row.risk,
+                      sortable: true,
+                      cell: (row, index, column, id) => {return displayEstimations ? row["risk"] : "hidden"}
+                    },
+                    {
+                      name: "Complexity",
+                      selector: row => row.complexity,
+                      sortable: true,
+                      cell: (row, index, column, id) => {return displayEstimations ? row["complexity"] : "hidden"}
+                    },
+                    {
+                      name: "Effort",
+                      selector: row => row.effort,
+                      sortable: true,
+                      cell: (row, index, column, id) => {return displayEstimations ? row["effort"] : "hidden"}
+                    },
+                    {
+                      name: "Score",
+                      selector: row => row.score,
+                      sortable: true,
+                      cell: (row, index, column, id) => {return displayEstimations ? row["score"] : "hidden"}
+                    }
                   ] }
                   data={data} >
                 </DataTable>
             </Row>
         </Container>
-        
-         
       
     </div>
   );

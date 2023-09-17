@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { v4 as uuidv4 } from 'uuid';
 import backendUrl from './utils.js';
+import {getFromLocalWithExpiry, setLocalStageWithExpiry} from './local-storage.js';
 
 const levelToInt = (level) => {
     if (level === "low") {
@@ -56,21 +57,29 @@ const put = (url, body) => {
             })
     })();
 }
-  
+const ESTIMATION_BOARD_LOCALSTORAGE_USERNAME = "estimationBoard/localUser";
+
+const generateinitUsers = () => {
+    // generates a row with the user name from local storage if one is found
+    const initUser = {};
+    const existingLocalUser = getFromLocalWithExpiry(ESTIMATION_BOARD_LOCALSTORAGE_USERNAME);
+    initUser[existingLocalUser] = {
+        "risk": "",
+        "complexity": "",
+        "effort": "",
+        "score": "",
+        "id": uuidv4(),
+    }
+    
+    return initUser;
+}
+
 export const estimatorsSlice = createSlice({
   name: 'estimators',
   initialState: {
     showEstimations: true,
-    localUser: "",
-    users: {
-        "": {
-            "risk": "",
-            "complexity": "",
-            "effort": "",
-            "score": "",
-            "id": uuidv4(),
-        }
-    }
+    localUser: getFromLocalWithExpiry(ESTIMATION_BOARD_LOCALSTORAGE_USERNAME),
+    users: generateinitUsers()
   },
   reducers: {
     updateFromBackend: (state, action) => {
@@ -80,7 +89,7 @@ export const estimatorsSlice = createSlice({
         // dont overwrite localUser
         if (localUser !== "") {
             newUsers[localUser] = {...state["users"][localUser]};           
-        } 
+        }
         
         return {
             ...state,
@@ -94,37 +103,33 @@ export const estimatorsSlice = createSlice({
         /**
          * Updates the name in two places:
          * (1) localUser name and...
-         * (2) updates the users object use the new name as the key or generates a new row for the user
+         * (2) updates the users object use the new name as the key 
+         * (3) update localStorage to have the new username, which is picked up on slice init
          * Example: name="bob" (replacing "rob")
          * {localUser: "bob", users: {"bob": {...}}}
          */
         const [name] = action.payload;  
         const newUsers = {...state["users"]};
         const oldlocalUser = state["localUser"];
-        if (oldlocalUser !== "") {
-            const oldUserData = {...newUsers[oldlocalUser]};
-            delete newUsers[oldlocalUser];
-            newUsers[name] = oldUserData
-        } else {
-            // TOOD: necessary anymore?
-            newUsers[name] = {
-                "risk": "",
-                "complexity": "",
-                "effort": "",
-                "score": "",
-                "id": uuidv4(),
-            };
-        }
-        console.log(`update localusername ${JSON.stringify(newUsers)}`)
+                
+        // (2) updates the users object use the new name as the key 
+        const oldUserData = {...newUsers[oldlocalUser]};
+        delete newUsers[oldlocalUser];
+        newUsers[name] = oldUserData;
+    
+        console.log(`update localusername ${JSON.stringify(newUsers)}`);
+        // (3) update localStorage to have the new username, which is picked up on slice init
+        setLocalStageWithExpiry(ESTIMATION_BOARD_LOCALSTORAGE_USERNAME, name, 360000);
         return {
             ...state,
-            localUser: name,
+            localUser: name, // (1) localUser name
             users: newUsers,
         }
     },
     clear: (state, action) => {
         const users = state["users"];
         const newUsers = {...users};
+        // TODO: wrong; tell the backend to delete its data
         Object.entries(users).forEach((userName, user) => {
             const empty = {
                 "risk": "",
@@ -158,7 +163,8 @@ export const estimatorsSlice = createSlice({
         state["users"][user]["complexity"] = level;
         const newScore = calculateScore({risk, complexity: level, effort})
         state["users"][user]["score"] = newScore;
-        put(backendUrl("estimate"), {user: user, newScore: newScore, "complexity": level}); 
+        // Update the id in the backend; ok with this since the localuser row is owned by the local user (it's source of truth is local)
+        put(backendUrl("estimate"), {id: state["users"][user].id,  user: user, newScore: newScore, "complexity": level}); 
 
         return state;
     },
@@ -169,7 +175,7 @@ export const estimatorsSlice = createSlice({
         state["users"][user]["effort"] = level;
         const newScore = calculateScore({risk, complexity, effort: level})
         state["users"][user]["score"] = newScore;
-        put(backendUrl("estimate"), {user: user, newScore: newScore, "effort": level}); 
+        put(backendUrl("estimate"), {id: state["users"][user].id, user: user, newScore: newScore, "effort": level}); 
 
         return state;
     },
@@ -180,7 +186,7 @@ export const estimatorsSlice = createSlice({
         state["users"][user]["risk"] = level;
         const newScore = calculateScore({risk: level, complexity, effort});
         state["users"][user]["score"] = newScore;
-        put(backendUrl("estimate"), {user: user, newScore: newScore, "risk": level}); 
+        put(backendUrl("estimate"), {id: state["users"][user].id, user: user, newScore: newScore, "risk": level}); 
         return state;
     },
   },
