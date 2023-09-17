@@ -3,6 +3,8 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Container from 'react-bootstrap/Container';
+import Navbar from 'react-bootstrap/Navbar';
+import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
@@ -11,6 +13,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, selectUsers, selectShowEstimations, selectLocalUser, showEstimations, hideEstimations, clear } from './estimators';
 import backendUrl from './utils.js';
 import { useSearchParams } from "react-router-dom";
+import DataTable from 'react-data-table-component';
 
 const Section = ({title, user, updateLevel}) => {
   const dispatch = useDispatch();
@@ -56,30 +59,20 @@ function App() {
     }
   }, [dispatch, displayEstimations]);
   
-  // Initial load of users from backend
-  useEffect(() => {
-    (async () => {
-      let response = await fetch(backendUrl("estimation")); // TODO: uri as a variable
-      
-      if (!response.ok) {
-        const message = `An error has occured: ${response.status}`;
-        throw new Error(message);
-      } else {
-        const result = await response.json();
-        dispatch(updateFromBackend([result]));
-        return result;
-      }
-      
-    })();
-  }, [dispatch]);
-  
-  const POLLING_RATE = 6000; // 2 seconds
-  //poll backend for changes to users every 500ms
+  const POLLING_RATE = 10000; // 2 seconds
+  //poll backend for changes to users every POLLING_RATE
   const updateState = useCallback(async () => {
     // TODO: dry out with initial load, do we need both?
     let response = await fetch(backendUrl("estimation"));
-    const data = await response.json();
-    dispatch(updateFromBackend([data]));
+    if (!response.ok) {
+      const message = `An error has occured: ${response.status}`;
+      throw new Error(message);
+    } else {
+      const data = await response.json();
+      dispatch(updateFromBackend([data]));
+      return data;
+    }
+    
   }, [dispatch]);
 
   useEffect(() => {
@@ -92,79 +85,99 @@ function App() {
     return <></>;
   }
   
-  console.log(`usersFromAPI = ${JSON.stringify(users)}`);  
-  const {localUserId, risk, complexity, effort, score} = {...users[localUser]};
   const setLocalUserName = ({e}) => {
     const name = e.target.value;
     dispatch(updateLocalUserName([name]));
   }
+
+  const data = Object.entries(users).map(([username, user]) => {
+    const {id, risk, complexity, effort, score} = {...user};
+    return {id, username, risk, complexity, effort, score};
+  });
+
+
   return (
     <div className="App">
-      
-      <header className="App-header">
+     
+        <header className="App-header">
+        
+          <Navbar expand="lg" className="bg-body-tertiary justify-content-between">
+              <Form inline>
+                <InputGroup>
+                  <InputGroup.Text id="basic-addon1">@</InputGroup.Text>
+                  <Form.Control type="text" placeholder="Enter your username" value={localUser} onChange={(e) => setLocalUserName({e})} />
+                </InputGroup>
+              </Form>
+            </Navbar>
+        
+        </header>
+        
         <Container justify="center">
-          <Row>
+          
+          <Row className="add-space">
             <Col><Section title="Risk" user={localUser} updateLevel={updateRisk} /></Col>
             <Col><Section title="Complexity" user={localUser} updateLevel={updateComplexity}/></Col>
             <Col><Section title="Effort" user={localUser} updateLevel={updateEffort} /></Col>
           </Row>
-        </Container>
-        <Container>
-          <Row className="justify-content-md-center">
-          <Col></Col>
-            <Col></Col>
-            <Col> 
-              <Button variant="primary" onClick={() => dispatch(clear())}>Clear</Button>
-            </Col>
-            <Col>{showOrHideButton}</Col>
-          </Row>
-        </Container>
         
-        <Container>
-          <Row>
-            <Col>Name</Col>
-            <Col>Risk</Col>
-            <Col>Complexity</Col>
-            <Col>Effort</Col>
-            <Col>Score</Col>
-          </Row>
-          <Row key={localUserId}>
-              <Col>
-              <Form>
-                <Form.Group className="mb-3" controlId="formBasicname">
-                  <Form.Control type="text" placeholder="Enter your name" value={localUser} onChange={(e) => setLocalUserName({e})} />
-                </Form.Group>
-              </Form>
-              </Col>
-              <Col>{!risk ? "" : risk}</Col>
-              <Col>{!complexity ? "": complexity}</Col>
-              <Col>{!effort ? "": effort}</Col>
-              <Col>{score}</Col>
-          </Row>
+          <Row className="justify-content-md-center add-space">
           
-          {
-            Object.entries(users).map(([userName, user]) => {
-                const {risk, complexity, effort, score} = {...user};
-                if (localUser === userName) {
-                  return <></>
-                }
-                if (displayEstimations) {
-                  return <Row key={users[userName].id}>
-                    <Col>{userName}</Col>
-                    <Col>{!risk ? "" : risk}</Col>
-                    <Col>{!complexity ? "": complexity}</Col>
-                    <Col>{!effort ? "": effort}</Col>
-                    <Col>{score}</Col></Row>
-                } else {
-                  return <Row key={userName}><Col>{userName}</Col><Col>hidden</Col><Col>hidden</Col><Col>hidden</Col><Col>hidden</Col></Row>
-                }
-                
-            })
-          }
+            <Col> 
+            <div className="d-grid gap-2">
+              <Button variant="primary" onClick={() => dispatch(clear())}>Clear</Button>
+            </div>
+
+            </Col>
+            <Col>
+            <div className="d-grid gap-2">
+            {showOrHideButton}
+            </div>
+            </Col>
+          </Row>
+          <Row>
+            <DataTable
+              keyField='id'
+              columns={
+                          [{
+                              name: 'Name',
+                              selector: row => row.username,
+                              sortable: true,
+                              cell: (row, index, column, id) => {
+                                  return row["username"]
+                              }
+                          },
+                          {
+                            name: 'Risk',
+                            selector: row => row.risk,
+                            sortable: true,
+                            cell: (row, index, column, id) => {return displayEstimations ? row["risk"] : "hidden"}
+                          },
+                          {
+                            name: "Complexity",
+                            selector: row => row.complexity,
+                            sortable: true,
+                            cell: (row, index, column, id) => {return displayEstimations ? row["complexity"] : "hidden"}
+                          },
+                          {
+                            name: "Effort",
+                            selector: row => row.effort,
+                            sortable: true,
+                            cell: (row, index, column, id) => {return displayEstimations ? row["effort"] : "hidden"}
+                          },
+                          {
+                            name: "Score",
+                            selector: row => row.score,
+                            sortable: true,
+                            cell: (row, index, column, id) => {return displayEstimations ? row["score"] : "hidden"}
+                          }
+                  ] }
+                  data={data} >
+                </DataTable>
+            </Row>
         </Container>
         
          
-      </header>
+      
     </div>
   );
 }

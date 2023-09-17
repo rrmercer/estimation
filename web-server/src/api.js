@@ -59,7 +59,7 @@ router.put("/estimate", (req, res) => {
   // Example req body: {user: user, newScore: newScore, "effort": level})
   const {user, newScore, effort, risk, complexity} = req.body;
    
-  if (!state["users"].hasOwnProperty(user)) {
+  if (!(user in state["users"])) {
     // if the user does not exist yet
     state["users"][user] = {}
   }

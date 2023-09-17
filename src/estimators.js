@@ -77,7 +77,7 @@ export const estimatorsSlice = createSlice({
         const [result] = action.payload;
         const localUser = state.localUser;
         let newUsers = {...result["users"]};
-        // save localUser; dont overwrite it
+        // dont overwrite localUser
         if (localUser !== "") {
             newUsers[localUser] = {...state["users"][localUser]};           
         } 
@@ -94,7 +94,7 @@ export const estimatorsSlice = createSlice({
         /**
          * Updates the name in two places:
          * (1) localUser name and...
-         * (2) updates the users object use the new name as the key
+         * (2) updates the users object use the new name as the key or generates a new row for the user
          * Example: name="bob" (replacing "rob")
          * {localUser: "bob", users: {"bob": {...}}}
          */

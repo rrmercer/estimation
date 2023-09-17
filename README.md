@@ -87,13 +87,15 @@ b. Be able to enter your name - DONE
 c. Get clear working  - DONE 
 
 2. Get the estimation board to work remotely for multiple users
-a. node.js with express running -DONE
-b. // TODO: remove? how to handle if the user has not put in one of the three levels?
-c. Gonna need a polling function - DONE
-d. Push the whole local user state (risk/effort/complexity) state up everytime. Only update your row with estimations.
-e. Switch from CRA to vite! omg... when did that die...?
-f. environment variables with vite!
-g. cors fixes
+- node.js with express running -DONE
+- Gonna need a polling function - DONE
+- Push the whole local user state (risk/effort/complexity) state up everytime. Only update your row with estimations. -- DONE 
+- environment variables ! - DONE
+- Fix refresh bug: (1) open app; enter new name "bobby" (2) enter a risk/effort (3) hit refresh... bobby is no longer the current user row... it's at the bottom and is uneditable
+- data table - make columns sortable.
+- Switch from CRA to vite! omg... when did that die...?
+- cors fixes
+- // TODO: remove? how to handle if the user has not put in one of the three levels?
 
 ---- MVP ----
 
