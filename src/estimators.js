@@ -57,6 +57,20 @@ const put = (url, body) => {
             })
     })();
 }
+
+const deleteUrl = (url, body) => {
+    (async () => {
+        await fetch(url, 
+            {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                  },
+                body: JSON.stringify(body)
+            })
+    })();
+};
+
 const ESTIMATION_BOARD_LOCALSTORAGE_USERNAME = "estimationBoard/localUser";
 
 const generateinitUsers = () => {
@@ -127,19 +141,22 @@ export const estimatorsSlice = createSlice({
         }
     },
     clear: (state, action) => {
-        const users = state["users"];
-        const newUsers = {...users};
-        // TODO: wrong; tell the backend to delete its data
-        Object.entries(users).forEach((userName, user) => {
-            const empty = {
-                "risk": "",
-                "complexity": "",
-                "effort": "",
-                "score": "",
-                "id": uuidv4(),
-            };
-            newUsers[userName[0]] = {...empty};
-        });
+        /**
+         * (1) clear localUser row
+         * (2) call DELETE /estimate
+         * (3) update against the server
+         */
+        // (1) clear localUser row
+        const newUsers = {...state["users"]};
+        const localUsername = state["localUser"];
+        newUsers[localUsername] = {"id": newUsers[localUsername]["id"]};
+
+        // (2) call DELETE /estimate
+        deleteUrl(backendUrl("estimate"));
+
+        // (3) update against the server
+        // TODO: ...? necessary or just clear it locally myself
+        
         return {...state, users: newUsers};
     },
     showEstimations: (state, action) => {

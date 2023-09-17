@@ -26,15 +26,15 @@ const state = {
           "id": "2",
           "risk": "low",
           "complexity": "medium",
-          "effort": "high",
-          "score": 5
+          "effort": "low",
+          "score": 3
       },
       "sally": {
           "id": "3",
           "risk": "low",
-          "complexity": "medium",
-          "effort": "high",
-          "score": 5
+          "complexity": "low",
+          "effort": "low",
+          "score": 1
       }
   }
 };
@@ -54,6 +54,18 @@ router.put("/show_estimations", (req, res) => {
   state.showEstimations = req.body.showEstimations;
   res.send({status: "OK"});
 });
+
+router.delete("/estimate", (req, res) => {
+  const newUsers = {...state.users};
+  for (let user in newUsers) {
+    newUsers[user] = {
+      "id": newUsers[user]["id"],
+    };
+  }
+  console.log(`DELETE estimation called: updating ${newUsers}`);
+  state.users = newUsers;
+  res.send({status: "OK"});
+})
 
 router.put("/estimate", (req, res) => {
   // Example req body: {user: user, newScore: newScore, "effort": level})

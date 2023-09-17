@@ -59,7 +59,7 @@ function App() {
     }
   }, [dispatch, displayEstimations]);
   
-  const POLLING_RATE = 10000; // 2 seconds
+  const POLLING_RATE = 5000; // 2 seconds
   //poll backend for changes to users every POLLING_RATE
   const updateState = useCallback(async () => {
     // TODO: dry out with initial load, do we need both?
@@ -138,13 +138,14 @@ function App() {
           <Row>
             <DataTable
               keyField='id'
+              defaultSortFieldId='score'
               columns={
                     [{
                         name: 'Name',
                         selector: row => row.username,
                         sortable: true,
                         cell: (row, index, column, id) => {
-                            return row["username"] === null ? "Enter your username above!" : row["username"]
+                            return row["username"] === "null" ? "Enter your username above!" : row["username"]
                         }
                     },
                     {
