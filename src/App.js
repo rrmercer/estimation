@@ -65,6 +65,7 @@ function App() {
   }, [dispatch, displayEstimations]);
   
   const POLLING_RATE = 5000; // 2 seconds
+  // @todo Update speed of refreshes
   //poll backend for changes to users every POLLING_RATE
   const updateState = useCallback(async () => {
     // TODO: dry out with initial load, do we need both? Initial load is slow
@@ -107,7 +108,7 @@ function App() {
      * 1.) If user has not entered anything; display a blank
      * 2.) Otherwise, hide the value if displayEstimations is False; show the estimation if displayEstimations is True
      */
-    if (value === "") {
+    if (value === "" || value === undefined) {
       return "";
     }
     return displayEstimations ? value : "hidden"

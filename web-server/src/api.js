@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const app = express();
 
 app.use(cors({
-  origin: '*' // TODO: fixme! this is too permissive
+  origin: '*' // @todo fixme! this is too permissive
 }));
 const jsonParser = bodyParser.json()
 app.use(jsonParser);
@@ -62,7 +62,6 @@ router.delete("/estimate", (req, res) => {
       "id": newUsers[user]["id"],
     };
   }
-  console.log(`DELETE estimation called: updating ${newUsers}`);
   state.users = newUsers;
   res.send({status: "OK"});
 })
@@ -70,13 +69,12 @@ router.delete("/estimate", (req, res) => {
 router.put("/estimate", (req, res) => {
   // Example req body: {user: user, newScore: newScore, "effort": level})
   const {id, user, newScore, effort, risk, complexity} = req.body;
-  console.log(`estimation called: updating ${user}`);
   if (!(user in state["users"])) {
     // if the user does not exist yet
     state["users"][user] = {}
   }
   if (id) {
-    // Note: this is pretty silly to use the username as the primary key instead of the id; 
+    // @todo Note: this is pretty silly to use the username as the primary key instead of the id; 
     // this should be fixed. It's because of how this program evolved that I started with username
     // as the id and then added id to fix some react issues rendering rows in the ux.
     // This is "alright" for now since the source of truth for the rows that are being updated here
@@ -94,7 +92,23 @@ router.put("/estimate", (req, res) => {
   }
   state["users"][user]["score"] = newScore;
 
-  console.log(`After estimate put ${JSON.stringify(state)}`);
+  //console.log(`After estimate put ${JSON.stringify(state)}`);
+  res.send({status: "OK"})
+})
+
+router.put("/user", (req, res) => {
+  // Example req body: {user: user, newScore: newScore, "effort": level})
+  const {user, newUsername} = req.body;
+  const newUsers = {...state["users"]};
+  const oldlocalUser = user;
+  const oldUserData = {...newUsers[oldlocalUser]};
+  
+  if (oldUserData !== undefined) {
+    // (2) updates the users object use the new name as the key 
+    delete newUsers[oldlocalUser];
+    newUsers[newUsername] = oldUserData;
+    state["users"] = newUsers;
+  }
   res.send({status: "OK"})
 })
 

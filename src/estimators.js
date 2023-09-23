@@ -88,12 +88,13 @@ const generateinitUsers = () => {
     return initUser;
 }
 
+/**
+ * Update the level (low,med,high) of a given shard in the state and update the backend to the change
+ * 1.) Update the shard  (complexity, effort, risk) to the next level (low, med, high)
+ * 2.) calculate the new score
+ * 3.) Update the backend with the new shard level and score for the given user
+ */
 const updateLevel = (shard, user, level, state) => {
-    /**
-     * 1.) Update the shard  (complexity, effort, risk) to the next level (low, med, high)
-     * 2.) calculate the new score
-     * 3.) Update the backend with the new shard level and score for the given user
-     */
     // 1.) Update the shard  (complexity, effort, risk) to the next level (low, med, high)
     state["users"][user][shard] = level; 
     const {risk, complexity, effort} = state["users"][user];
@@ -139,6 +140,7 @@ export const estimatorsSlice = createSlice({
          * (1) localUser name and...
          * (2) updates the users object use the new name as the key 
          * (3) update localStorage to have the new username, which is picked up on slice init
+         * (4) update the backend with the new username
          * Example: name="bob" (replacing "rob")
          * {localUser: "bob", users: {"bob": {...}}}
          */
@@ -153,6 +155,10 @@ export const estimatorsSlice = createSlice({
     
         // (3) update localStorage to have the new username, which is picked up on slice init
         setLocalStageWithExpiry(ESTIMATION_BOARD_LOCALSTORAGE_USERNAME, name, 360000);
+
+        // (4) update the backend with the new username
+        // usecase here; updating an existing username breaks
+        put(backendUrl("user"), {id: oldUserData.id, user: oldlocalUser, newUsername: name});
         return {
             ...state,
             localUser: name, // (1) localUser name
