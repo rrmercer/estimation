@@ -15,7 +15,7 @@ import backendUrl from './utils.js';
 import { useSearchParams } from "react-router-dom";
 import DataTable from 'react-data-table-component';
 
-const Section = ({title, user, updateLevel}) => {
+const Section = ({title, user, updateLevel, disabled}) => {
   const dispatch = useDispatch();
   const users = useSelector(selectUsers);
   const level = useMemo(() => {
@@ -31,11 +31,11 @@ const Section = ({title, user, updateLevel}) => {
         <Card.Subtitle className="mb-2 text-muted">Select an {title} level</Card.Subtitle>
         
         <ButtonGroup aria-label="Basic example">
-          <Button variant={level === "low" ? "primary" : "secondary"} 
+          <Button disabled={disabled} variant={level === "low" ? "primary" : "secondary"} 
             onClick={() => { dispatch(updateLevel([user, "low"]))}}>Low</Button>
-          <Button variant={level === "medium" ? "primary" : "secondary"} 
+          <Button disabled={disabled} variant={level === "medium" ? "primary" : "secondary"} 
             onClick={() => { dispatch(updateLevel([user, "medium"]))}}>Medium</Button>
-          <Button variant={level === "high" ? "primary" : "secondary"} 
+          <Button disabled={disabled} variant={level === "high" ? "primary" : "secondary"} 
             onClick={() => { dispatch(updateLevel([user, "high"]))}}>
               High
           </Button>
@@ -51,6 +51,11 @@ function App() {
   var users = useSelector(selectUsers);
   const displayEstimations = useSelector(selectShowEstimations);
   const localUser = useSelector(selectLocalUser);
+
+  const isLocalUserNameSet = useMemo(() => {
+    return localUser === null;
+  }, [localUser]);
+
   const showOrHideButton = useMemo(() => {
     if (displayEstimations) {
       return  <Button variant="secondary" onClick={() => {dispatch(hideEstimations());}}>Hide</Button>
@@ -62,7 +67,7 @@ function App() {
   const POLLING_RATE = 5000; // 2 seconds
   //poll backend for changes to users every POLLING_RATE
   const updateState = useCallback(async () => {
-    // TODO: dry out with initial load, do we need both?
+    // TODO: dry out with initial load, do we need both? Initial load is slow
     let response = await fetch(backendUrl("estimation"));
     if (!response.ok) {
       const message = `An error has occured: ${response.status}`;
@@ -97,6 +102,16 @@ function App() {
   });
 
 
+  const displayValue = (value) => {
+    /**
+     * 1.) If user has not entered anything; display a blank
+     * 2.) Otherwise, hide the value if displayEstimations is False; show the estimation if displayEstimations is True
+     */
+    if (value === "") {
+      return "";
+    }
+    return displayEstimations ? value : "hidden"
+  }
   return (
     <div className="App">
      
@@ -116,9 +131,9 @@ function App() {
         <Container justify="center">
           
           <Row className="add-space">
-            <Col><Section title="Risk" user={localUser} updateLevel={updateRisk} /></Col>
-            <Col><Section title="Complexity" user={localUser} updateLevel={updateComplexity}/></Col>
-            <Col><Section title="Effort" user={localUser} updateLevel={updateEffort} /></Col>
+            <Col><Section title="Risk" user={localUser} updateLevel={updateRisk} disabled={isLocalUserNameSet} /></Col>
+            <Col><Section title="Complexity" user={localUser} updateLevel={updateComplexity} disabled={isLocalUserNameSet}/></Col>
+            <Col><Section title="Effort" user={localUser} updateLevel={updateEffort} disabled={isLocalUserNameSet}/></Col>
           </Row>
         
           <Row className="justify-content-md-center add-space">
@@ -152,25 +167,25 @@ function App() {
                       name: 'Risk',
                       selector: row => row.risk,
                       sortable: true,
-                      cell: (row, index, column, id) => {return displayEstimations ? row["risk"] : "hidden"}
+                      cell: (row, index, column, id) => {return displayValue(row["risk"])}
                     },
                     {
                       name: "Complexity",
                       selector: row => row.complexity,
                       sortable: true,
-                      cell: (row, index, column, id) => {return displayEstimations ? row["complexity"] : "hidden"}
+                      cell: (row, index, column, id) => {return displayValue(row["complexity"])}
                     },
                     {
                       name: "Effort",
                       selector: row => row.effort,
                       sortable: true,
-                      cell: (row, index, column, id) => {return displayEstimations ? row["effort"] : "hidden"}
+                      cell: (row, index, column, id) => {return displayValue(row["effort"])}
                     },
                     {
                       name: "Score",
                       selector: row => row.score,
                       sortable: true,
-                      cell: (row, index, column, id) => {return displayEstimations ? row["score"] : "hidden"}
+                      cell: (row, index, column, id) => {return displayValue(row["score"])}
                     }
                   ] }
                   data={data} >

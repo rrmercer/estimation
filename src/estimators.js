@@ -13,7 +13,7 @@ const levelToInt = (level) => {
     if (level === "high") {
       return 3;
     }
-    return 1;// TODO: remove? how to handle if the user has not put in one of the three levels?
+    return 1;
 }
 /**
  * 
@@ -131,7 +131,6 @@ export const estimatorsSlice = createSlice({
         delete newUsers[oldlocalUser];
         newUsers[name] = oldUserData;
     
-        console.log(`update localusername ${JSON.stringify(newUsers)}`);
         // (3) update localStorage to have the new username, which is picked up on slice init
         setLocalStageWithExpiry(ESTIMATION_BOARD_LOCALSTORAGE_USERNAME, name, 360000);
         return {

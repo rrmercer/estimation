@@ -11,12 +11,13 @@ Test site: https://estimations-test-board.netlify.app
 
 In the project directory, you can run:
 
-### Starting
+# Setup
 
-# Frontend:
-cd estimation && export REACT_APP_BACKEND_URL=<netlify_backend_url> && npm start 
+## Frontend:
+cd estimation && export REACT_APP_BACKEND_URL=<netlify_backend_url, see step below> && npm start 
+Example: export REACT_APP_BACKEND_URL=http://127.0.0.1:9000/ && npm start 
 
-# Backend: (in another window)
+## Backend: (in another window)
 cd estimation/web-server && npm run localbuild && npm run start
 
 Runs the app in the development mode.\
@@ -24,13 +25,6 @@ Open [http://localhost:3000?password=<SEE ABOVE>](http://localhost:3000?password
 
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
 
 # Backlog
 1. Objective: Get the estimation board working locally
@@ -49,10 +43,13 @@ c. Get clear working  - DONE
 3. Fix usability and display issues
 a. add some padding to the top and center all the things/fix spacing between clear and show button, add a background to the top row of the table - DONE
 b. better png/card for hidden values. Better png/card for values not entered
-c. Different png/display for hidden vs hidden and not entered
-- // TODO: remove? how to handle if the user has not put in one of the three levels?
+c. Different png/display for hidden vs hidden and not entered - DONE
+d. Disable the effort/risk/complexity buttons if the user has not put their username in && - // TODO: remove? how to handle if the user has not put in one of the three levels? -DONE
+e. Updating username after the PUT creates a second username
+        
 
 4. TESTING!
+- Edge cases: dont enter a username then click on effort/risk etc..., change username, username collisions
 ---- MVP ----
 5. Allow for multiple boards
 
@@ -63,3 +60,10 @@ c. Different png/display for hidden vs hidden and not entered
 3. Typescript
 4. linting/autoformatting
 5. cors fixes
+
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
