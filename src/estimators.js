@@ -88,6 +88,26 @@ const generateinitUsers = () => {
     return initUser;
 }
 
+const updateLevel = (shard, user, level, state) => {
+    /**
+     * 1.) Update the shard  (complexity, effort, risk) to the next level (low, med, high)
+     * 2.) calculate the new score
+     * 3.) Update the backend with the new shard level and score for the given user
+     */
+    // 1.) Update the shard  (complexity, effort, risk) to the next level (low, med, high)
+    state["users"][user][shard] = level; 
+    const {risk, complexity, effort} = state["users"][user];
+    // 2.) calculate the new score
+    const newScore = calculateScore({risk, complexity, effort})
+    state["users"][user]["score"] = newScore;
+    // Update the id in the backend; ok with this since the localuser row is owned by the local user (it's source of truth is local)
+    // 3.) Update the backend with the new shard level and score for the given user
+    const updateToBackend = {id: state["users"][user].id,  user: user, newScore: newScore};
+    updateToBackend[shard] = level;
+    put(backendUrl("estimate"), updateToBackend); 
+    return state;
+}
+
 export const estimatorsSlice = createSlice({
   name: 'estimators',
   initialState: {
@@ -174,36 +194,15 @@ export const estimatorsSlice = createSlice({
     },
     updateComplexity: (state, action) => {
         const [user, level] = action.payload;
-        //TODO: dont modify the state directly here; DRY THESE OUT!!
-        const {risk, effort} = state["users"][user];
-        state["users"][user]["complexity"] = level;
-        const newScore = calculateScore({risk, complexity: level, effort})
-        state["users"][user]["score"] = newScore;
-        // Update the id in the backend; ok with this since the localuser row is owned by the local user (it's source of truth is local)
-        put(backendUrl("estimate"), {id: state["users"][user].id,  user: user, newScore: newScore, "complexity": level}); 
-
-        return state;
+        return updateLevel("complexity", user, level, state);
     },
     updateEffort: (state, action) => {
         const [user, level] = action.payload;
-        //TODO: dont modify the state directly here
-        const {risk, complexity } = state["users"][user];
-        state["users"][user]["effort"] = level;
-        const newScore = calculateScore({risk, complexity, effort: level})
-        state["users"][user]["score"] = newScore;
-        put(backendUrl("estimate"), {id: state["users"][user].id, user: user, newScore: newScore, "effort": level}); 
-
-        return state;
+        return updateLevel("effort", user, level, state);
     },
     updateRisk: (state, action) => {
         const [user, level] = action.payload;
-        //TODO: dont modify the state directly here
-        const {complexity, effort} = state["users"][user];
-        state["users"][user]["risk"] = level;
-        const newScore = calculateScore({risk: level, complexity, effort});
-        state["users"][user]["score"] = newScore;
-        put(backendUrl("estimate"), {id: state["users"][user].id, user: user, newScore: newScore, "risk": level}); 
-        return state;
+        return updateLevel("risk", user, level, state);
     },
   },
 })
