@@ -14,6 +14,7 @@ import { updateComplexity, updateRisk, updateEffort, updateLocalUserName, update
 import backendUrl from './utils.js';
 import { useSearchParams } from "react-router-dom";
 import DataTable from 'react-data-table-component';
+import { FcMindMap } from "react-icons/fc";
 
 const Section = ({title, user, updateLevel, disabled}) => {
   const dispatch = useDispatch();
@@ -97,7 +98,9 @@ function App() {
     dispatch(updateLocalUserName([name]));
   }
 
-  const data = Object.entries(users).map(([username, user]) => {
+  // table data transformation from obj to an array of objects
+  
+  const tableData = Object.entries(users).map(([username, user]) => {
     const {id, risk, complexity, effort, score} = {...user};
     return {id, username, risk, complexity, effort, score};
   });
@@ -111,7 +114,10 @@ function App() {
     if (value === "" || value === undefined) {
       return "";
     }
-    return displayEstimations ? value : "hidden"
+    if (displayEstimations) {
+      return value;
+    } 
+    return <FcMindMap />;
   }
   return (
     <div className="App">
@@ -189,7 +195,7 @@ function App() {
                       cell: (row, index, column, id) => {return displayValue(row["score"])}
                     }
                   ] }
-                  data={data} >
+                  data={tableData} >
                 </DataTable>
             </Row>
         </Container>

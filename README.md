@@ -60,11 +60,12 @@ a. add some padding to the top and center all the things/fix spacing between cle
 b. better png/card for hidden values. Better png/card for values not entered
 c. Different png/display for hidden vs hidden and not entered - DONE
 d. Disable the effort/risk/complexity buttons if the user has not put their username in && - // TODO: remove? how to handle if the user has not put in one of the three levels? -DONE
-e. Updating username after the PUT creates a second username
+e. Updating username after the PUT creates a second username - DONE
         
 
 4. TESTING!
-- Edge cases: dont enter a username then click on effort/risk etc..., change username, username collisions
+- Edge cases: dont enter a username then click on effort/risk etc..., change username
+- Edge case: username collisions
 ---- MVP ----
 5. Allow for multiple boards
 6. Address openssl-legacy-provider step in setup
