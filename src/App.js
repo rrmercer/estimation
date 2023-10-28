@@ -57,15 +57,7 @@ function App() {
     return localUser === null;
   }, [localUser]);
 
-  const showOrHideButton = useMemo(() => {
-    if (displayEstimations) {
-      return  <Button variant="secondary" onClick={() => {dispatch(hideEstimations());}}>Hide</Button>
-    } else {
-      return <Button variant="primary" onClick={() => {dispatch(showEstimations());}}>Show</Button>
-    }
-  }, [dispatch, displayEstimations]);
-  
-  const POLLING_RATE = 5000; // 2 seconds
+  const POLLING_RATE = 2000; // 2 seconds
   // @todo Update speed of refreshes
   //poll backend for changes to users every POLLING_RATE
   const updateState = useCallback(async () => {
@@ -99,7 +91,7 @@ function App() {
   }
 
   // table data transformation from obj to an array of objects
-  
+  // TODO: move this to a method; clean up return and such {...}
   const tableData = Object.entries(users).map(([username, user]) => {
     const {id, risk, complexity, effort, score} = {...user};
     return {id, username, risk, complexity, effort, score};
@@ -119,6 +111,8 @@ function App() {
     } 
     return <FcMindMap />;
   }
+
+  
   return (
     <div className="App">
      
@@ -143,18 +137,26 @@ function App() {
             <Col><Section title="Effort" user={localUser} updateLevel={updateEffort} disabled={isLocalUserNameSet}/></Col>
           </Row>
         
-          <Row className="justify-content-md-center add-space">
-          
+          <Row className="justify-content-md-center add-space">          
             <Col> 
-            <div className="d-grid gap-2">
               <Button variant="primary" onClick={() => dispatch(clear())}>Clear</Button>
-            </div>
-
             </Col>
             <Col>
-            <div className="d-grid gap-2">
-            {showOrHideButton}
-            </div>
+              <Form>
+                <Form.Check 
+                  type="switch"
+                  checked={displayEstimations}
+                  onChange={() => {
+                    if (displayEstimations) {
+                      dispatch(hideEstimations());
+                    } else {
+                      dispatch(showEstimations());
+                    }
+                  }}
+                  id="custom-switch"
+                  label="Show"
+              />
+              </Form>
             </Col>
           </Row>
           <Row>
