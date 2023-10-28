@@ -13,8 +13,14 @@ In the project directory, you can run:
 
 # Setup
 
+## Install Dependencies (one time)
+cd estimation && npm install
+cd estimation/web-server && npm install
+
 ## Frontend:
-cd estimation && export REACT_APP_BACKEND_URL=<netlify_backend_url, see step below> && npm start 
+export REACT_APP_BACKEND_URL=http://127.0.0.1:9000/
+Note: REACT_APP_BACKEND_URL=<netlify_backend_url, see step below> 
+cd estimation && npm start 
 Example: export REACT_APP_BACKEND_URL=http://127.0.0.1:9000/ && npm start 
 
 ## Backend: (in another window)
@@ -25,6 +31,15 @@ Open [http://localhost:3000?password=<SEE ABOVE>](http://localhost:3000?password
 
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
+
+### Troubleshooting
+If you get `opensslErrorStack` errors; you can get around this for now by using `export NODE_OPTIONS=--openssl-legacy-provider` before the npm commands
+
+```opensslErrorStack: [ 'error:03000086:digital envelope routines::initialization error' ],
+  library: 'digital envelope routines',
+  reason: 'unsupported',
+  code: 'ERR_OSSL_EVP_UNSUPPORTED'
+```
 
 # Backlog
 1. Objective: Get the estimation board working locally
@@ -52,6 +67,7 @@ e. Updating username after the PUT creates a second username
 - Edge cases: dont enter a username then click on effort/risk etc..., change username, username collisions
 ---- MVP ----
 5. Allow for multiple boards
+6. Address openssl-legacy-provider step in setup
 
 
 # Tech/Debt Issue Backlog
