@@ -61,7 +61,8 @@ b. better png/card for hidden values. Better png/card for values not entered
 c. Different png/display for hidden vs hidden and not entered - DONE
 d. Disable the effort/risk/complexity buttons if the user has not put their username in && - // TODO: remove? how to handle if the user has not put in one of the three levels? -DONE
 e. Updating username after the PUT creates a second username - DONE
-        
+f. My local user's estimations should always be visible to me
+h. Clear on user 1. User 2's values will not go away. Proposal: just update the updateFromBackend to detect if the local user is bieng set to triple 0s and if so; then just allow it in this one case
 
 4. TESTING!
 - Edge cases: dont enter a username then click on effort/risk etc..., change username

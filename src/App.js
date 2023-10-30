@@ -98,18 +98,23 @@ function App() {
   });
 
 
-  const displayValue = (value) => {
+  const displayValue = (value, username) => {
     /**
-     * 1.) If user has not entered anything; display a blank
-     * 2.) Otherwise, hide the value if displayEstimations is False; show the estimation if displayEstimations is True
-     */
+      * 0.) if the user is == local user (The current user line) then just show the values for that user
+      * 1.) If user has not entered anything; display a blank
+      * 2.) Otherwise, hide the value if displayEstimations is False; show the estimation if displayEstimations is True
+      */
     if (value === "" || value === undefined) {
       return "";
     }
-    if (displayEstimations) {
+    if (username === localUser) {
       return value;
-    } 
-    return <FcMindMap />;
+    } else {
+      if (displayEstimations) {
+        return value;
+      } 
+      return <FcMindMap />;
+    }
   }
 
   
@@ -176,25 +181,25 @@ function App() {
                       name: 'Risk',
                       selector: row => row.risk,
                       sortable: true,
-                      cell: (row, index, column, id) => {return displayValue(row["risk"])}
+                      cell: (row, index, column, id) => {return displayValue(row["risk"], row["username"])}
                     },
                     {
                       name: "Complexity",
                       selector: row => row.complexity,
                       sortable: true,
-                      cell: (row, index, column, id) => {return displayValue(row["complexity"])}
+                      cell: (row, index, column, id) => {return displayValue(row["complexity"], row["username"])}
                     },
                     {
                       name: "Effort",
                       selector: row => row.effort,
                       sortable: true,
-                      cell: (row, index, column, id) => {return displayValue(row["effort"])}
+                      cell: (row, index, column, id) => {return displayValue(row["effort"], row["username"])}
                     },
                     {
                       name: "Score",
                       selector: row => row.score,
                       sortable: true,
-                      cell: (row, index, column, id) => {return displayValue(row["score"])}
+                      cell: (row, index, column, id) => {return displayValue(row["score"], row["username"])}
                     }
                   ] }
                   data={tableData} >
