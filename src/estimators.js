@@ -125,10 +125,20 @@ export const estimatorsSlice = createSlice({
         if (localUser !== "") {
             newUsers[localUser] = {...state["users"][localUser]};           
         }
+
+        // Do we clear our local users estimations too? only clear our local user's estimations if 
+        // lastClearTimestamp from the server !== our lastClearTimestamp we recevied
+        if (result.lastClearTimestamp !== state.lastClearTimestamp) {
+            newUsers[localUser].risk = "";
+            newUsers[localUser].complexity = "";
+            newUsers[localUser].effort = "";
+            newUsers[localUser].score = "";
+        }
         
         return {
             ...state,
             showEstimations: result["showEstimations"],
+            lastClearTimestamp: result.lastClearTimestamp,
             users: {
                 ...newUsers
             }

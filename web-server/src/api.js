@@ -14,6 +14,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 const state = {
   showEstimations: true,
+  lastClearTimestamp: undefined,
   users: { 
       "rob": {
           "id": "1",
@@ -63,6 +64,7 @@ router.delete("/estimate", (req, res) => {
     };
   }
   state.users = newUsers;
+  state.lastClearTimestamp = Date.now();
   res.send({status: "OK"});
 })
 
