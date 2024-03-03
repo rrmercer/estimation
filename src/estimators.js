@@ -45,29 +45,9 @@ const calculateScore = ({risk, complexity, effort}) => {
     }
 }
 
-const put = (url, body) => {
-    (async () => {
-        await fetch(url, 
-            {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                  },
-                body: JSON.stringify(body)
-            })
-    })();
-}
-
-const deleteUrl = (url, body) => {
-    (async () => {
-        await fetch(url, 
-            {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                  },
-                body: JSON.stringify(body)
-            })
+const netlifyFunction = (url) => {
+    (async () => { 
+        await fetch(url) 
     })();
 };
 
@@ -105,7 +85,7 @@ const updateLevel = (shard, user, level, state) => {
     // 3.) Update the backend with the new shard level and score for the given user
     const updateToBackend = {id: state["users"][user].id,  user: user, newScore: newScore};
     updateToBackend[shard] = level;
-    put(backendUrl("estimate"), updateToBackend); 
+    netlifyFunction(`${backendUrl("estimate")}&body=${JSON.stringify(updateToBackend)}`); 
     return state;
 }
 
@@ -168,7 +148,8 @@ export const estimatorsSlice = createSlice({
 
         // (4) update the backend with the new username
         // usecase here; updating an existing username breaks
-        put(backendUrl("user"), {id: oldUserData.id, user: oldlocalUser, newUsername: name});
+        //put(backendUrl("user"), {id: oldUserData.id, user: oldlocalUser, newUsername: name});
+        netlifyFunction(`${backendUrl("user")}&body=${JSON.stringify({id: oldUserData.id, user: oldlocalUser, newUsername: name})}`)
         return {
             ...state,
             localUser: name, // (1) localUser name
@@ -186,8 +167,8 @@ export const estimatorsSlice = createSlice({
         const localUsername = state["localUser"];
         newUsers[localUsername] = {"id": newUsers[localUsername]["id"]};
 
-        // (2) call DELETE /estimate
-        deleteUrl(backendUrl("estimate"));
+        // (2) call CLEAR function on backend 
+        netlifyFunction(backendUrl("clear"))
 
         // (3) update against the server
         // TODO: ...? necessary or just clear it locally myself
@@ -195,14 +176,14 @@ export const estimatorsSlice = createSlice({
         return {...state, users: newUsers};
     },
     showEstimations: (state, action) => {
-        put(backendUrl("show_estimations"), {showEstimations: true});
+        netlifyFunction(`${backendUrl("show_estimations")}&showEstimations=true`)
         return {
             ...state,
             showEstimations: true,
         };
     },
     hideEstimations: (state, action) => {
-        put(backendUrl("show_estimations"), {showEstimations: false});
+        netlifyFunction(`${backendUrl("show_estimations")}&showEstimations=false`)
         return {
             ...state,
             showEstimations: false,

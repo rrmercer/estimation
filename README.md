@@ -18,13 +18,14 @@ cd estimation && npm install
 cd estimation/web-server && npm install
 
 ## Frontend:
-export REACT_APP_BACKEND_URL=http://127.0.0.1:9000/
+export REACT_APP_BACKEND_URL=http://localhost:8888/
 Note: REACT_APP_BACKEND_URL=<netlify_backend_url, see step below> 
 cd estimation && npm start 
 Example: export REACT_APP_BACKEND_URL=http://127.0.0.1:9000/ && npm start 
 
 ## Backend: (in another window)
-cd estimation/web-server && npm run localbuild && npm run start
+export REDIS_URL="redis://<username>:<password>@url:port"
+cd netlify-functions-test & netlify dev
 
 Runs the app in the development mode.\
 Open [http://localhost:3000?password=<SEE ABOVE>](http://localhost:3000?password=<SEE ABOVE>) to view it in your browser.
