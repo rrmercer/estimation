@@ -8,9 +8,10 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
-import { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, selectUsers, selectShowEstimations, selectLocalUser, showEstimations, hideEstimations, clear } from './estimators';
+import { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, selectUsers, selectShowEstimations, selectLocalUser, selectBoardName, showEstimations, hideEstimations, clear, updateLocalBoardName } from './estimators';
+
 import backendUrl from './utils.js';
 import { useSearchParams } from "react-router-dom";
 import DataTable from 'react-data-table-component';
@@ -51,28 +52,33 @@ function App() {
   const [searchParams] = useSearchParams(); 
   var users = useSelector(selectUsers);
   const displayEstimations = useSelector(selectShowEstimations);
-  const localUser = useSelector(selectLocalUser);
+  const initialLocalUser = useSelector(selectLocalUser);
+  const initialBoardName = useSelector(selectBoardName);
+  const [localUser, setLocalUser] = useState(initialLocalUser);
+  const [boardName, setBoardName] = useState();
 
-  const isLocalUserNameSet = useMemo(() => {
-    return localUser === null;
-  }, [localUser]);
+  const isRequiredInputSet = useMemo(() => {
+    return localUser === undefined || initialBoardName === undefined;
+  }, [localUser, initialBoardName]);
 
   const POLLING_RATE = 2000; // 2 seconds
   // @todo Update speed of refreshes
   //poll backend for changes to users every POLLING_RATE
   const updateState = useCallback(async () => {
-    // TODO: dry out with initial load, do we need both? Initial load is slow
-    let response = await fetch(backendUrl("estimation"));
-    if (!response.ok) {
-      const message = `An error has occured: ${response.status}`;
-      throw new Error(message);
-    } else {
-      const data = await response.json();
-      dispatch(updateFromBackend([data]));
-      return data;
+    if (initialBoardName !== undefined) {
+      // TODO: dry out with initial load, do we need both? Initial load is slow
+      let response = await fetch(backendUrl("estimation", initialBoardName));
+      if (!response.ok) {
+        const message = `An error has occured: ${response.status}`;
+        throw new Error(message);
+      } else {
+        const data = await response.json();
+        dispatch(updateFromBackend([data]));
+        return data;
+      }
     }
     
-  }, [dispatch]);
+  }, [dispatch, initialBoardName]);
 
   useEffect(() => {
     setInterval(updateState, POLLING_RATE);
@@ -87,8 +93,21 @@ function App() {
   
   const setLocalUserName = ({e}) => {
     const name = e.target.value;
-    dispatch(updateLocalUserName([name]));
+    setLocalUser(name);
+
   }
+
+  const setLocalBoardName = ({e}) => {
+    const name = e.target.value;
+    setBoardName(name);
+  } 
+
+  const handleSubmit = (event) => {
+    console.log(`updating ${localUser} and ${boardName}`)
+    event.preventDefault();
+    dispatch(updateLocalUserName([localUser]));
+    dispatch(updateLocalBoardName([boardName]));
+  };
 
   // table data transformation from obj to an array of objects
   // TODO: move this to a method; clean up return and such {...}
@@ -124,11 +143,36 @@ function App() {
         <header className="App-header">
         
           <Navbar expand="lg" className="bg-body-tertiary justify-content-between">
-              <Form inline>
-                <InputGroup>
-                  <InputGroup.Text id="basic-addon1">@</InputGroup.Text>
-                  <Form.Control type="text" placeholder="Enter your username" value={localUser} onChange={(e) => setLocalUserName({e})} />
-                </InputGroup>
+          
+            <Navbar.Brand href="#home">
+              <img
+                alt=""
+                src="/logo192.png"
+                width="30"
+                height="30"
+                className="d-inline-block align-top"
+              />{' '}
+              Estimation Board
+            </Navbar.Brand>
+          
+              <Form inline onSubmit={handleSubmit}>
+              <Row>
+                <Col xs="auto">
+                  <InputGroup>
+                    <InputGroup.Text id="basic-addon1">@</InputGroup.Text>
+                    <Form.Control type="text" placeholder="Enter your username" value={localUser}  onChange={(e) => setLocalUserName({e})}/>
+                  </InputGroup>
+                </Col>
+                <Col xs="auto">
+                  <InputGroup>
+                    <InputGroup.Text id="basic-addon1">Board Name</InputGroup.Text>
+                    <Form.Control type="text" placeholder="Enter boardname" value={boardName}  onChange={(e) => setLocalBoardName({e})} />
+                  </InputGroup>
+                </Col>
+                <Col xs="auto">
+                <Button type="submit">Submit</Button>
+                </Col>
+              </Row>
               </Form>
             </Navbar>
         
@@ -137,9 +181,9 @@ function App() {
         <Container justify="center">
           
           <Row className="add-space">
-            <Col><Section title="Risk" user={localUser} updateLevel={updateRisk} disabled={isLocalUserNameSet} /></Col>
-            <Col><Section title="Complexity" user={localUser} updateLevel={updateComplexity} disabled={isLocalUserNameSet}/></Col>
-            <Col><Section title="Effort" user={localUser} updateLevel={updateEffort} disabled={isLocalUserNameSet}/></Col>
+            <Col><Section title="Risk" user={localUser} updateLevel={updateRisk} disabled={isRequiredInputSet} /></Col>
+            <Col><Section title="Complexity" user={localUser} updateLevel={updateComplexity} disabled={isRequiredInputSet}/></Col>
+            <Col><Section title="Effort" user={localUser} updateLevel={updateEffort} disabled={isRequiredInputSet}/></Col>
           </Row>
         
           <Row className="justify-content-md-center add-space">          

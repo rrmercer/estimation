@@ -6,6 +6,6 @@ if (!BACKEND_BASE_URL.endsWith("/")) {
     BACKEND_BASE_URL = `${BACKEND_BASE_URL}/`;
 }
 const BACKEND_URL = `${BACKEND_BASE_URL}.netlify/functions/hello-world`
-const backendUrl = (endpoint) => `${BACKEND_URL}?function=${endpoint}`;
+const backendUrl = (endpoint, board) => `${BACKEND_URL}?function=${endpoint}&board=${board}`;
 
 export default backendUrl;

@@ -85,7 +85,7 @@ const updateLevel = (shard, user, level, state) => {
     // 3.) Update the backend with the new shard level and score for the given user
     const updateToBackend = {id: state["users"][user].id,  user: user, newScore: newScore};
     updateToBackend[shard] = level;
-    netlifyFunction(`${backendUrl("estimate")}&body=${JSON.stringify(updateToBackend)}`); 
+    netlifyFunction(`${backendUrl("estimate", state["boardId"])}&body=${JSON.stringify(updateToBackend)}`); 
     return state;
 }
 
@@ -94,7 +94,7 @@ export const estimatorsSlice = createSlice({
   initialState: {
     showEstimations: true,
     localUser: getFromLocalWithExpiry(ESTIMATION_BOARD_LOCALSTORAGE_USERNAME),
-    users: generateinitUsers()
+    users: generateinitUsers(),
   },
   reducers: {
     updateFromBackend: (state, action) => {
@@ -107,8 +107,9 @@ export const estimatorsSlice = createSlice({
         }
 
         // Do we clear our local users estimations too? only clear our local user's estimations if 
-        // lastClearTimestamp from the server !== our lastClearTimestamp we recevied
-        if (result.lastClearTimestamp !== state.lastClearTimestamp) {
+        // lastClearTimestamp from the server !== our lastClearTimestamp we recevied.
+        // state.lastClearTimestamp !== undefined -- see BUG 1; dont clear if its the first update
+        if (state.lastClearTimestamp !== undefined && result.lastClearTimestamp !== state.lastClearTimestamp) {
             newUsers[localUser].risk = "";
             newUsers[localUser].complexity = "";
             newUsers[localUser].effort = "";
@@ -142,14 +143,16 @@ export const estimatorsSlice = createSlice({
         const oldUserData = {...newUsers[oldlocalUser]};
         delete newUsers[oldlocalUser];
         newUsers[name] = oldUserData;
-    
+        
+        const ONE_DAY_IN_MILLI = 24*60*60*1000;
         // (3) update localStorage to have the new username, which is picked up on slice init
-        setLocalStageWithExpiry(ESTIMATION_BOARD_LOCALSTORAGE_USERNAME, name, 360000);
+        setLocalStageWithExpiry(ESTIMATION_BOARD_LOCALSTORAGE_USERNAME, name, ONE_DAY_IN_MILLI);
 
         // (4) update the backend with the new username
         // usecase here; updating an existing username breaks
         //put(backendUrl("user"), {id: oldUserData.id, user: oldlocalUser, newUsername: name});
-        netlifyFunction(`${backendUrl("user")}&body=${JSON.stringify({id: oldUserData.id, user: oldlocalUser, newUsername: name})}`)
+        const body = JSON.stringify({id: oldUserData.id, user: oldlocalUser, newUsername: name})
+        netlifyFunction(`${backendUrl("user", state["boardId"])}&body=${body}`)
         return {
             ...state,
             localUser: name, // (1) localUser name
@@ -168,7 +171,7 @@ export const estimatorsSlice = createSlice({
         newUsers[localUsername] = {"id": newUsers[localUsername]["id"]};
 
         // (2) call CLEAR function on backend 
-        netlifyFunction(backendUrl("clear"))
+        netlifyFunction(backendUrl("clear", state["boardId"]))
 
         // (3) update against the server
         // TODO: ...? necessary or just clear it locally myself
@@ -176,14 +179,14 @@ export const estimatorsSlice = createSlice({
         return {...state, users: newUsers};
     },
     showEstimations: (state, action) => {
-        netlifyFunction(`${backendUrl("show_estimations")}&showEstimations=true`)
+        netlifyFunction(`${backendUrl("show_estimations")}&showEstimations=true`, state["boardId"])
         return {
             ...state,
             showEstimations: true,
         };
     },
     hideEstimations: (state, action) => {
-        netlifyFunction(`${backendUrl("show_estimations")}&showEstimations=false`)
+        netlifyFunction(`${backendUrl("show_estimations")}&showEstimations=false`, state["boardId"])
         return {
             ...state,
             showEstimations: false,
@@ -201,6 +204,19 @@ export const estimatorsSlice = createSlice({
         const [user, level] = action.payload;
         return updateLevel("risk", user, level, state);
     },
+    updateLocalBoardName: (state, action) => {
+        const [boardName] = action.payload;  
+        if (boardName !== state.boardId) {
+            // reset state
+            return {
+                showEstimations: true,
+                localUser: getFromLocalWithExpiry(ESTIMATION_BOARD_LOCALSTORAGE_USERNAME),
+                users: generateinitUsers(),
+                boardId: boardName,
+            }
+        }
+        return {...state};
+    }
   },
 })
 
@@ -209,10 +225,11 @@ function selectUsers(state) {
 }
 const selectShowEstimations = (state) => state.estimator.showEstimations;
 const selectLocalUser = (state) => state.estimator.localUser;
+const selectBoardName = (state) => state.estimator.boardId;
     
 
 // Action creators are generated for each case reducer function
-const { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, showEstimations, hideEstimations, clear } = estimatorsSlice.actions
-export { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, selectUsers, selectLocalUser, selectShowEstimations, showEstimations, hideEstimations, clear};
+const { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, showEstimations, hideEstimations, clear, updateLocalBoardName } = estimatorsSlice.actions
+export { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, updateLocalBoardName, selectUsers, selectLocalUser, selectBoardName, selectShowEstimations, showEstimations, hideEstimations, clear};
 
 export default estimatorsSlice.reducer
