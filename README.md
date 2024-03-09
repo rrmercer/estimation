@@ -18,7 +18,7 @@ cd estimation && npm install
 cd estimation/web-server && npm install
 
 ## Frontend:
-export REACT_APP_BACKEND_URL=http://localhost:8888/
+export REACT_APP_BACKEND_URL=http://localhost:5000/
 Note: REACT_APP_BACKEND_URL=<netlify_backend_url, see step below> 
 cd estimation && npm start 
 Example: export REACT_APP_BACKEND_URL=http://127.0.0.1:9000/ && npm start 

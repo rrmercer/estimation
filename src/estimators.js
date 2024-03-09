@@ -45,6 +45,32 @@ const calculateScore = ({risk, complexity, effort}) => {
     }
 }
 
+const put = (url, body) => {
+    (async () => {
+        await fetch(url, 
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                  },
+                body: JSON.stringify(body)
+            })
+    })();
+}
+
+const deleteUrl = (url, body) => {
+    (async () => {
+        await fetch(url, 
+            {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                  },
+                body: JSON.stringify(body)
+            })
+    })();
+};
+
 const netlifyFunction = (url) => {
     (async () => { 
         await fetch(url) 
@@ -85,7 +111,8 @@ const updateLevel = (shard, user, level, state) => {
     // 3.) Update the backend with the new shard level and score for the given user
     const updateToBackend = {id: state["users"][user].id,  user: user, newScore: newScore};
     updateToBackend[shard] = level;
-    netlifyFunction(`${backendUrl("estimate", state["boardId"])}&body=${JSON.stringify(updateToBackend)}`); 
+    put(backendUrl("estimate", state["boardId"]), updateToBackend); 
+    //netlifyFunction(`${backendUrl("estimate", state["boardId"])}&body=${JSON.stringify(updateToBackend)}`); 
     return state;
 }
 
@@ -150,9 +177,8 @@ export const estimatorsSlice = createSlice({
 
         // (4) update the backend with the new username
         // usecase here; updating an existing username breaks
-        //put(backendUrl("user"), {id: oldUserData.id, user: oldlocalUser, newUsername: name});
-        const body = JSON.stringify({id: oldUserData.id, user: oldlocalUser, newUsername: name})
-        netlifyFunction(`${backendUrl("user", state["boardId"])}&body=${body}`)
+        const body = {id: oldUserData.id, user: oldlocalUser, newUsername: name};
+        put(backendUrl("user", state["boardId"]), body);
         return {
             ...state,
             localUser: name, // (1) localUser name
@@ -170,8 +196,8 @@ export const estimatorsSlice = createSlice({
         const localUsername = state["localUser"];
         newUsers[localUsername] = {"id": newUsers[localUsername]["id"]};
 
-        // (2) call CLEAR function on backend 
-        netlifyFunction(backendUrl("clear", state["boardId"]))
+        // (2) call DELETE /estimate
+        deleteUrl(backendUrl("estimate", state["boardId"]));
 
         // (3) update against the server
         // TODO: ...? necessary or just clear it locally myself
@@ -179,14 +205,16 @@ export const estimatorsSlice = createSlice({
         return {...state, users: newUsers};
     },
     showEstimations: (state, action) => {
-        netlifyFunction(`${backendUrl("show_estimations")}&showEstimations=true`, state["boardId"])
+        put(backendUrl("show_estimations", state["boardId"]), {showEstimations: true});
+        //netlifyFunction(`${backendUrl("show_estimations")}&showEstimations=true`, state["boardId"])
         return {
             ...state,
             showEstimations: true,
         };
     },
     hideEstimations: (state, action) => {
-        netlifyFunction(`${backendUrl("show_estimations")}&showEstimations=false`, state["boardId"])
+        put(backendUrl("show_estimations", state["boardId"]), {showEstimations: false});
+        // netlifyFunction(`${backendUrl("show_estimations")}&showEstimations=false`, state["boardId"])
         return {
             ...state,
             showEstimations: false,
@@ -220,16 +248,11 @@ export const estimatorsSlice = createSlice({
   },
 })
 
-function selectUsers(state) {
-    return state.estimator.users;
-}
-const selectShowEstimations = (state) => state.estimator.showEstimations;
-const selectLocalUser = (state) => state.estimator.localUser;
-const selectBoardName = (state) => state.estimator.boardId;
+export const selectUsers = (state) => state.estimator.users;
+export const selectShowEstimations = (state) => state.estimator.showEstimations;
+export const selectLocalUser = (state) => state.estimator.localUser;
+export const selectBoardName = (state) => state.estimator.boardId;
     
+export const {...actions} = estimatorsSlice.actions;
 
-// Action creators are generated for each case reducer function
-const { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, showEstimations, hideEstimations, clear, updateLocalBoardName } = estimatorsSlice.actions
-export { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, updateLocalBoardName, selectUsers, selectLocalUser, selectBoardName, selectShowEstimations, showEstimations, hideEstimations, clear};
-
-export default estimatorsSlice.reducer
+export default estimatorsSlice.reducer;

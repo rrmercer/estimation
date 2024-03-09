@@ -5,7 +5,6 @@ if (!BACKEND_BASE_URL.startsWith("http")) {
 if (!BACKEND_BASE_URL.endsWith("/")) {
     BACKEND_BASE_URL = `${BACKEND_BASE_URL}/`;
 }
-const BACKEND_URL = `${BACKEND_BASE_URL}.netlify/functions/hello-world`
-const backendUrl = (endpoint, board) => `${BACKEND_URL}?function=${endpoint}&board=${board}`;
+const backendUrl = (endpoint, board) => `${BACKEND_BASE_URL}${endpoint}?board=${board}`;
 
 export default backendUrl;

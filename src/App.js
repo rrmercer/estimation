@@ -10,7 +10,7 @@ import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
-import { updateComplexity, updateRisk, updateEffort, updateLocalUserName, updateFromBackend, selectUsers, selectShowEstimations, selectLocalUser, selectBoardName, showEstimations, hideEstimations, clear, updateLocalBoardName } from './estimators';
+import * as estimatorState from './estimators';
 
 import backendUrl from './utils.js';
 import { useSearchParams } from "react-router-dom";
@@ -19,7 +19,7 @@ import { FcMindMap } from "react-icons/fc";
 
 const Section = ({title, user, updateLevel, disabled}) => {
   const dispatch = useDispatch();
-  const users = useSelector(selectUsers);
+  const users = useSelector(estimatorState.selectUsers);
   const level = useMemo(() => {
     if (user in users) {
       return users[user][title.toLowerCase()];
@@ -50,10 +50,10 @@ const Section = ({title, user, updateLevel, disabled}) => {
 function App() {
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams(); 
-  var users = useSelector(selectUsers);
-  const displayEstimations = useSelector(selectShowEstimations);
-  const initialLocalUser = useSelector(selectLocalUser);
-  const initialBoardName = useSelector(selectBoardName);
+  var users = useSelector(estimatorState.selectUsers);
+  const displayEstimations = useSelector(estimatorState.selectShowEstimations);
+  const initialLocalUser = useSelector(estimatorState.selectLocalUser);
+  const initialBoardName = useSelector(estimatorState.selectBoardName);
   const [localUser, setLocalUser] = useState(initialLocalUser);
   const [boardName, setBoardName] = useState();
 
@@ -73,7 +73,7 @@ function App() {
         throw new Error(message);
       } else {
         const data = await response.json();
-        dispatch(updateFromBackend([data]));
+        dispatch(estimatorState.actions.updateFromBackend([data]));
         return data;
       }
     }
@@ -103,10 +103,9 @@ function App() {
   } 
 
   const handleSubmit = (event) => {
-    console.log(`updating ${localUser} and ${boardName}`)
     event.preventDefault();
-    dispatch(updateLocalUserName([localUser]));
-    dispatch(updateLocalBoardName([boardName]));
+    dispatch(estimatorState.actions.updateLocalBoardName([boardName]));
+    dispatch(estimatorState.actions.updateLocalUserName([localUser]));
   };
 
   // table data transformation from obj to an array of objects
@@ -181,14 +180,14 @@ function App() {
         <Container justify="center">
           
           <Row className="add-space">
-            <Col><Section title="Risk" user={localUser} updateLevel={updateRisk} disabled={isRequiredInputSet} /></Col>
-            <Col><Section title="Complexity" user={localUser} updateLevel={updateComplexity} disabled={isRequiredInputSet}/></Col>
-            <Col><Section title="Effort" user={localUser} updateLevel={updateEffort} disabled={isRequiredInputSet}/></Col>
+            <Col><Section title="Risk" user={localUser} updateLevel={estimatorState.actions.updateRisk} disabled={isRequiredInputSet} /></Col>
+            <Col><Section title="Complexity" user={localUser} updateLevel={estimatorState.actions.updateComplexity} disabled={isRequiredInputSet}/></Col>
+            <Col><Section title="Effort" user={localUser} updateLevel={estimatorState.actions.updateEffort} disabled={isRequiredInputSet}/></Col>
           </Row>
         
           <Row className="justify-content-md-center add-space">          
             <Col> 
-              <Button variant="primary" onClick={() => dispatch(clear())}>Clear</Button>
+              <Button variant="primary" onClick={() => dispatch(estimatorState.actions.clear())}>Clear</Button>
             </Col>
             <Col>
               <Form>
@@ -197,9 +196,9 @@ function App() {
                   checked={displayEstimations}
                   onChange={() => {
                     if (displayEstimations) {
-                      dispatch(hideEstimations());
+                      dispatch(estimatorState.actions.hideEstimations());
                     } else {
-                      dispatch(showEstimations());
+                      dispatch(estimatorState.actions.showEstimations());
                     }
                   }}
                   id="custom-switch"
