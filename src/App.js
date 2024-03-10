@@ -62,28 +62,29 @@ function App() {
   }, [localUser, initialBoardName]);
 
   const POLLING_RATE = 2000; // 2 seconds
+
   // @todo Update speed of refreshes
   //poll backend for changes to users every POLLING_RATE
   const updateState = useCallback(async () => {
-    if (initialBoardName !== undefined) {
-      // TODO: dry out with initial load, do we need both? Initial load is slow
-      let response = await fetch(backendUrl("estimation", initialBoardName));
-      if (!response.ok) {
-        const message = `An error has occured: ${response.status}`;
-        throw new Error(message);
-      } else {
-        const data = await response.json();
-        dispatch(estimatorState.actions.updateFromBackend([data]));
-        return data;
-      }
-    }
-    
-  }, [dispatch, initialBoardName]);
+      if (boardName !== undefined) {
+        // TODO: dry out with initial load, do we need both? Initial load is slow
+        let response = await fetch(backendUrl("estimation", boardName));
+        if (!response.ok) {
+          const message = `An error has occured: ${response.status}`;
+          throw new Error(message);
+        } else {
+          const data = await response.json();
+          dispatch(estimatorState.actions.updateFromBackend([data]));
+          return data;
+        }
+      } 
+  }, [initialBoardName]);
 
   useEffect(() => {
-    setInterval(updateState, POLLING_RATE);
+    const intervalId = setInterval(updateState, POLLING_RATE);
+    return () => clearInterval(intervalId);  
   }, [updateState]);
-  
+
   // wrap the whole tree in this little check to prevent folks from abusing the site
   const password = searchParams.get("password");
   if (password !== "lilpassword!") {
@@ -194,6 +195,7 @@ function App() {
                 <Form.Check 
                   type="switch"
                   checked={displayEstimations}
+                  disabled={isRequiredInputSet}
                   onChange={() => {
                     if (displayEstimations) {
                       dispatch(estimatorState.actions.hideEstimations());

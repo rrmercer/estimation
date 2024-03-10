@@ -71,12 +71,6 @@ const deleteUrl = (url, body) => {
     })();
 };
 
-const netlifyFunction = (url) => {
-    (async () => { 
-        await fetch(url) 
-    })();
-};
-
 const ESTIMATION_BOARD_LOCALSTORAGE_USERNAME = "estimationBoard/localUser";
 
 const generateinitUsers = () => {
@@ -112,7 +106,6 @@ const updateLevel = (shard, user, level, state) => {
     const updateToBackend = {id: state["users"][user].id,  user: user, newScore: newScore};
     updateToBackend[shard] = level;
     put(backendUrl("estimate", state["boardId"]), updateToBackend); 
-    //netlifyFunction(`${backendUrl("estimate", state["boardId"])}&body=${JSON.stringify(updateToBackend)}`); 
     return state;
 }
 
@@ -142,7 +135,7 @@ export const estimatorsSlice = createSlice({
             newUsers[localUser].effort = "";
             newUsers[localUser].score = "";
         }
-        
+
         return {
             ...state,
             showEstimations: result["showEstimations"],
@@ -206,7 +199,6 @@ export const estimatorsSlice = createSlice({
     },
     showEstimations: (state, action) => {
         put(backendUrl("show_estimations", state["boardId"]), {showEstimations: true});
-        //netlifyFunction(`${backendUrl("show_estimations")}&showEstimations=true`, state["boardId"])
         return {
             ...state,
             showEstimations: true,
@@ -214,7 +206,6 @@ export const estimatorsSlice = createSlice({
     },
     hideEstimations: (state, action) => {
         put(backendUrl("show_estimations", state["boardId"]), {showEstimations: false});
-        // netlifyFunction(`${backendUrl("show_estimations")}&showEstimations=false`, state["boardId"])
         return {
             ...state,
             showEstimations: false,

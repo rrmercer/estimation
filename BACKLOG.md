@@ -27,12 +27,13 @@ h. DONE Clear on user 1. User 2's values will not go away. Proposal: maintain a 
 - Edge cases: dont enter a username then click on effort/risk etc..., change username
 - Edge case: username collisions
 ---- MVP ----
-5. Allow for multiple boards
+DONE 5. Allow for multiple boards
 6. Re-integrate backend into this repo
 7. Dev environment - dev database for local at least
-8. Fix imports/exports estimators.js
+DONE 8. Fix imports/exports estimators.js
 9. Validation on boardname and username (both must be alphanumeric only and between 3 and 64 chars).Add same validation to backend
-
+10. Clean up TODOs
+11. Fix all the awaits in front of setBoard/getBoard
 
 
 # Tech/Debt Issue Backlog

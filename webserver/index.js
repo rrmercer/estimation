@@ -18,14 +18,9 @@ const INIT_STATE = {
    }
  };
 
-const initBoard = () => {
-
-}
-
 const getBoard = async (client, board) => {
    
    const result = await client.get(board);
-   console.log("getBoard called");
    return JSON.parse(result);
 }
 
@@ -35,7 +30,6 @@ const setBoard = async (client, board, boardState) => {
 
 const getClient = async () => {
    if ( global.client === undefined ) {
-      console.log("CALLING createClient again");
       const { createClient } = await import("redis");
 
       global.client = createClient({ url: process.env.REDIS_URL });
@@ -66,17 +60,14 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/estimation", async (req, res) => {
-   console.log(`estimation CALLED ${JSON.stringify(req.query.board)}`);
    const boardId = req.query.board;
    validateBoardId(boardId);
-   console.log(`boardId ${boardId}`);
    // TODO DRY OUT
    state = await getBoard(await getClient(), boardId);
-   if (state === undefined || Object.keys(global.state).length == 0) {
+   if (state === undefined || state === null || Object.keys(state).length == 0) {
       state = INIT_STATE;
       await setBoard(await getClient(), boardId, state);
    }
-
    res.send(state);
 });
 
@@ -117,7 +108,6 @@ router.put("/estimate", async (req, res) => {
 
    // Example req body: {user: user, newScore: newScore, "effort": level})
    const {id, user, newScore, effort, risk, complexity} = req.body;
-   console.log(`PUT estimate boardId = ${boardId} ${user} ${newScore} state = ${JSON.stringify(state)}`)
    if (state["users"].length === 0 || !(user in state["users"])) {
       // if the user does not exist yet
       state["users"][user] = {}
@@ -142,7 +132,6 @@ router.put("/estimate", async (req, res) => {
    state["users"][user]["score"] = newScore;
 
    await setBoard(global.client, boardId, state);
-   //console.log(`After estimate put ${JSON.stringify(state)}`);
    res.send({status: "OK"})
 })
 
@@ -150,10 +139,9 @@ router.put("/user", async (req, res) => {
    
    const boardId = req.query.board;
    validateBoardId(boardId);
-   console.log(`USER CALL ${boardId}`);
    // TODO DRYOUT
    state = await getBoard(await getClient(), boardId);
-   if (state === undefined || Object.keys(global.state).length == 0) {
+   if (state === undefined || state === null || Object.keys(state).length == 0) {
       state = INIT_STATE;
    }
    
@@ -169,9 +157,7 @@ router.put("/user", async (req, res) => {
       newUsers[newUsername] = oldUserData;
       state["users"] = newUsers;
    }
-   console.log(`SAVING STATE AT END OF user call ${JSON.stringify(state)}`);
    await setBoard(global.client, boardId, state);
-   console.log(`turning around and retrieving that same state: ${JSON.stringify(await getBoard(await getClient(), boardId))}`);
    res.send({status: "OK"});
 })
 
