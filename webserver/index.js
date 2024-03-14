@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const logger = require('./logger.js');
 
 const app = express();
 
@@ -29,11 +30,20 @@ const setBoard = async (client, board, boardState) => {
 
 const getClient = async () => {
    if ( global.client === undefined ) {
+      logger.log({
+         level: 'info',
+         message: 'Creating a new redis connect'
+       });
       const { createClient } = await import("redis");
 
       global.client = createClient({ url: process.env.REDIS_URL });
 
-      global.client.on('error', err => console.log('Redis Client Error', err));
+      global.client.on('error', err => 
+         logger.log({
+            level: 'error',
+            message: `Redis Client Error ${err}`
+         })
+      );
 
       await global.client.connect();
    }
@@ -199,7 +209,10 @@ function errorHandler (err, req, res, next) {
       headers: req.headers,
       stack: err.stack,
       };
-   console.log(`An unexpected error occured : ${JSON.stringify(errorData)}`);
+      logger.log({
+         level: 'error',
+         message: `An unexpected error occured : ${JSON.stringify(errorData)}`
+       });
    res.status(500).send('Internal Server Error!'); // Users will see this
 }
 

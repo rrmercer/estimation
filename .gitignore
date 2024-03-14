@@ -2,6 +2,8 @@
 
 # web-server
 /web-server/functions/*
+/webserver/combined.log
+/webserver/error.log
 
 # dependencies
 /node_modules
