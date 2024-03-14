@@ -25,7 +25,7 @@ Example: export REACT_APP_BACKEND_URL=http://127.0.0.1:9000/ && npm start
 
 ## Backend: (in another window)
 export REDIS_URL="redis://<username>:<password>@url:port"
-cd netlify-functions-test & netlify dev
+cd webserver & node index.js
 
 Runs the app in the development mode.\
 Open [http://localhost:3000?password=<SEE ABOVE>](http://localhost:3000?password=<SEE ABOVE>) to view it in your browser.

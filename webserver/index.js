@@ -19,7 +19,6 @@ const INIT_STATE = {
  };
 
 const getBoard = async (client, board) => {
-   
    const result = await client.get(board);
    return JSON.parse(result);
 }
@@ -46,10 +45,10 @@ const validateBoardId = (boardId) => {
     * alphanumeric and less than 32 characters
     */
    if (boardId === undefined) {
-      // TODO: error
+      return false;
    }
-   // /^[a-z0-9]+$/i TODO finish validating boardId
-   return true;
+   
+   return /^[a-zA-Z0-9]+$/.test(boardId) && boardId.length >= 4 && boardId.length <= 32;
 }
 
 const router = express.Router();
@@ -59,110 +58,162 @@ router.get("/", async (req, res) => {
   });
 });
 
-router.get("/estimation", async (req, res) => {
+const validateBoardOrNext = (req, res) => {
    const boardId = req.query.board;
-   validateBoardId(boardId);
-   // TODO DRY OUT
-   state = await getBoard(await getClient(), boardId);
-   if (state === undefined || state === null || Object.keys(state).length == 0) {
-      state = INIT_STATE;
-      await setBoard(await getClient(), boardId, state);
+   if (!validateBoardId(boardId)) {
+      res.status(400).send("Invaid board ID! Must be alphanumeric and between 4 and 32 chars");
+      next();
    }
-   res.send(state);
+}
+
+router.get("/estimation", async (req, res, next) => {
+   try {
+      const boardId = req.query.board;
+      validateBoardOrNext(req, res);
+      
+      // TODO DRY OUT
+      state = await getBoard(await getClient(), boardId);
+      if (state === undefined || state === null || Object.keys(state).length == 0) {
+         state = INIT_STATE;
+         await setBoard(await getClient(), boardId, state);
+      }
+      res.send(state);
+   } catch (err) {
+      next(err);
+   }
 });
 
-router.put("/show_estimations", async (req, res) => {
-   const boardId = req.query.board;
-   validateBoardId(boardId);
-   state = await getBoard(await getClient(), boardId);
+router.put("/show_estimations", async (req, res, next) => {
+   try {
+      const boardId = req.query.board;
+      validateBoardOrNext(req, res);
+      state = await getBoard(await getClient(), boardId);
 
-   state.showEstimations = req.body.showEstimations;
-   
-   await setBoard(global.client, boardId, state);
+      state.showEstimations = req.body.showEstimations;
       
-   res.send({status: "OK"});
+      await setBoard(global.client, boardId, state);
+         
+      res.send({status: "OK"});
+   } catch (err) {
+      next(err);
+   }
 });
 
 router.delete("/estimate", async(req, res) => {
-   const boardId = req.query.board;
-   validateBoardId(boardId);
-   state = await getBoard(await getClient(), boardId);
-   
-   const newUsers = {...state.users};
-   for (let user in newUsers) {
-      newUsers[user] = {
-         "id": newUsers[user]["id"],
-      };
+   try {
+      const boardId = req.query.board;
+      validateBoardOrNext(req, res);
+      state = await getBoard(await getClient(), boardId);
+      
+      const newUsers = {...state.users};
+      for (let user in newUsers) {
+         newUsers[user] = {
+            "id": newUsers[user]["id"],
+         };
+      }
+      state.users = newUsers;
+      state.lastClearTimestamp = Date.now();
+      await setBoard(global.client, boardId, state);
+      res.send({status: "OK"});
+   } catch (err) {
+      next(err);
    }
-   state.users = newUsers;
-   state.lastClearTimestamp = Date.now();
-   await setBoard(global.client, boardId, state);
-   res.send({status: "OK"});
 })
 
 router.put("/estimate", async (req, res) => {
-   const boardId = req.query.board;
-   validateBoardId(boardId);
-   state = await getBoard(await getClient(), boardId);
-   //TODO how to handle a missing board?
+   try {
+      const boardId = req.query.board;
+      validateBoardOrNext(req, res);
+      state = await getBoard(await getClient(), boardId);
+      //TODO how to handle a missing board?
 
-   // Example req body: {user: user, newScore: newScore, "effort": level})
-   const {id, user, newScore, effort, risk, complexity} = req.body;
-   if (state["users"].length === 0 || !(user in state["users"])) {
-      // if the user does not exist yet
-      state["users"][user] = {}
-   }
-   if (id) {
-      // @todo Note: this is pretty silly to use the username as the primary key instead of the id; 
-      // this should be fixed. It's because of how this program evolved that I started with username
-      // as the id and then added id to fix some react issues rendering rows in the ux.
-      // This is "alright" for now since the source of truth for the rows that are being updated here
-      // are on the locals; not this backend
-      state["users"][user]["id"] = id;
-   }
-   if (effort) {
-      state["users"][user]["effort"] = effort;
-   }
-   if (risk) {
-      state["users"][user]["risk"] = risk;
-   }
-   if (complexity) {
-      state["users"][user]["complexity"] = complexity;
-   }
-   state["users"][user]["score"] = newScore;
+      // Example req body: {user: user, newScore: newScore, "effort": level})
+      const {id, user, newScore, effort, risk, complexity} = req.body;
+      if (state["users"].length === 0 || !(user in state["users"])) {
+         // if the user does not exist yet
+         state["users"][user] = {}
+      }
+      if (id) {
+         // @todo Note: this is pretty silly to use the username as the primary key instead of the id; 
+         // this should be fixed. It's because of how this program evolved that I started with username
+         // as the id and then added id to fix some react issues rendering rows in the ux.
+         // This is "alright" for now since the source of truth for the rows that are being updated here
+         // are on the locals; not this backend
+         state["users"][user]["id"] = id;
+      }
+      if (effort) {
+         state["users"][user]["effort"] = effort;
+      }
+      if (risk) {
+         state["users"][user]["risk"] = risk;
+      }
+      if (complexity) {
+         state["users"][user]["complexity"] = complexity;
+      }
+      state["users"][user]["score"] = newScore;
 
-   await setBoard(global.client, boardId, state);
-   res.send({status: "OK"})
+      await setBoard(global.client, boardId, state);
+      res.send({status: "OK"});
+   } catch (err) {
+      next(err);
+   }
 })
 
 router.put("/user", async (req, res) => {
-   
-   const boardId = req.query.board;
-   validateBoardId(boardId);
-   // TODO DRYOUT
-   state = await getBoard(await getClient(), boardId);
-   if (state === undefined || state === null || Object.keys(state).length == 0) {
-      state = INIT_STATE;
+   try {
+      const boardId = req.query.board;
+      validateBoardOrNext(req, res);
+      // TODO DRYOUT
+      state = await getBoard(await getClient(), boardId);
+      if (state === undefined || state === null || Object.keys(state).length == 0) {
+         state = INIT_STATE;
+      }
+      
+      // Example req body: {user: user, newScore: newScore, "effort": level})
+      const {user, newUsername} = req.body;
+      const newUsers = {...state["users"]};
+      const oldlocalUser = user;
+      const oldUserData = {...newUsers[oldlocalUser]};
+      
+      if (oldUserData !== undefined) {
+         // (2) updates the users object use the new name as the key 
+         delete newUsers[oldlocalUser];
+         newUsers[newUsername] = oldUserData;
+         state["users"] = newUsers;
+      }
+      await setBoard(global.client, boardId, state);
+      res.send({status: "OK"});
+   } catch (err) {
+      next(err);
    }
-   
-   // Example req body: {user: user, newScore: newScore, "effort": level})
-   const {user, newUsername} = req.body;
-   const newUsers = {...state["users"]};
-   const oldlocalUser = user;
-   const oldUserData = {...newUsers[oldlocalUser]};
-   
-   if (oldUserData !== undefined) {
-      // (2) updates the users object use the new name as the key 
-      delete newUsers[oldlocalUser];
-      newUsers[newUsername] = oldUserData;
-      state["users"] = newUsers;
-   }
-   await setBoard(global.client, boardId, state);
-   res.send({status: "OK"});
 })
 
 
+function errorHandler (err, req, res, next) {
+   const errorData = {
+      url: req.originalUrl,
+      method: req.method,
+      body: req.body,
+      params: req.params,
+      query: req.query,
+      headers: req.headers,
+      stack: err.stack,
+      };
+   console.log(`An unexpected error occured : ${JSON.stringify(errorData)}`);
+   res.status(500).send('Internal Server Error!'); // Users will see this
+}
+
+ const notFoundHandler = (req, res, next) => {
+   res.status(404).json({
+         error: 404,
+         message: "Route not found."
+      })
+   }
+
 app.use(router);
+app.use(errorHandler);
+app.use(notFoundHandler);
+app.disable('x-powered-by');
 var server = app.listen(5000, function () {
    console.log("Express App running at http://127.0.0.1:5000/");
 })

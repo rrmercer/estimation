@@ -34,6 +34,8 @@ DONE 8. Fix imports/exports estimators.js
 9. Validation on boardname and username (both must be alphanumeric only and between 3 and 64 chars).Add same validation to backend
 10. Clean up TODOs
 11. Fix all the awaits in front of setBoard/getBoard
+12. harden express js backend against exceptions (one exception kills whole server)
+13. Harden backend: https://expressjs.com/en/advanced/best-practice-security.html
 
 
 # Tech/Debt Issue Backlog
